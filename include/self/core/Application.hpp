@@ -11,8 +11,8 @@
 #include <expected>
 
 #include <self/core/Window.hpp>
-#include <self/core/Base.hpp>
 #include <self/core/Renderer.hpp>
+#include <self/widgets/MainWidget.hpp>
 
 class Application
 {
@@ -29,20 +29,12 @@ public:
 
     void Run();
 
-    Widget& GetRoot();
-
-    Widget* GetPressedWidget(const Point& point);
-
 private:
     explicit Application(Window window);
 
     Window window_;
-    Widget root_;
+    MainWidget root_;
     Renderer render_;
-
-    bool is_press_ = false;
-    Point press_position_{};
-    Widget* press_widget_ = nullptr;
 
 };
 

@@ -43,29 +43,6 @@ public:
     Window(Window&& other) noexcept;
     Window& operator=(Window&& other) noexcept;
 
-    [[nodiscard]] float
-    NormalizeWidth(const int width) const {
-        return static_cast<float>(width) / static_cast<float>(width_);
-    }
-    [[nodiscard]] float
-    NormalizeWidth(const double width) const {
-        return static_cast<float>(width) / static_cast<float>(width_);
-    }
-
-    [[nodiscard]] float
-    NormalizeHeight(const int height) const {
-        return static_cast<float>(height) / static_cast<float>(height_);
-    }
-    [[nodiscard]] float
-    NormalizeHeight(const double height) const {
-        return static_cast<float>(height) / static_cast<float>(height_);
-    }
-
-    [[nodiscard]] bool IsMousePressed(int button) const;
-    [[nodiscard]] Point GetMousePosition() const;
-
-    void LoadRoot(Widget* root);
-
     [[nodiscard]] int GetWidth() const;
     [[nodiscard]] int GetHeight() const;
 
@@ -79,8 +56,6 @@ public:
         self->width_ = width;
         self->height_ = height;
 
-        MainWidget::RemakeMain(self->height_, self->root_);
-
         glViewport(0, 0, width, height);
     }
 
@@ -90,9 +65,6 @@ private:
     int width_{};
     int height_{};
 
-    Widget* root_{};
-
     Window() = default;
-    explicit Window(GLFWwindow* window)
-        : window_{window} {}
+
 };

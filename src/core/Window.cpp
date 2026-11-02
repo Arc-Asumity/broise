@@ -120,8 +120,8 @@ bool Window::ShouldClose() const
 
 Window::Window(Window&& other) noexcept
     : window_(std::exchange(other.window_, nullptr))
-    , width_(std::exchange(other.width_, 0))
-    , height_(std::exchange(other.height_, 0))
+    , width_(other.width_)
+    , height_(other.height_)
 {
     if (window_ != nullptr) {
         glfwSetWindowUserPointer(window_, this);
@@ -140,34 +140,14 @@ Window& Window::operator=(Window&& other) noexcept
     }
 
     window_ = std::exchange(other.window_, nullptr);
-    width_ = std::exchange(other.width_, 0);
-    height_ = std::exchange(other.height_, 0);
+    width_ = other.width_;
+    height_ = other.height_;
 
     if (window_ != nullptr) {
         glfwSetWindowUserPointer(window_, this);
     }
 
     return *this;
-}
-
-bool Window::IsMousePressed(const int button) const
-{
-    return glfwGetMouseButton(window_, button) == GLFW_PRESS;
-}
-
-Point Window::GetMousePosition() const
-{
-    double x{}, y{};
-    glfwGetCursorPos(window_, &x, &y);
-    return Point{
-        .x = NormalizeWidth(x),
-        .y = NormalizeHeight(y)
-    };
-}
-
-void Window::LoadRoot(Widget* root)
-{
-    root_ = root;
 }
 
 int Window::GetWidth() const
