@@ -3,15 +3,15 @@
 // Licensed under the GPLv3 or later.
 // https://github.com/Arc-Asumity/broise
 // ==============================================================
-// Path /include/self/core/IWidget.hpp
-// Interface for Widget.
+// Path /include/self/parts/IPart.hpp
+// Interface for a Runtime UI Part.
 
 #pragma once
 
-class IWidget
+class IPart
 {
 public:
-    virtual ~IWidget() = default;
+    virtual ~IPart() = default;
 
     virtual void Render() = 0;
     virtual void Update() = 0;

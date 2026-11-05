@@ -3,8 +3,18 @@
 // Licensed under the GPLv3 or later.
 // https://github.com/Arc-Asumity/broise
 // ==============================================================
-// Path /src/widgets/MainWidget.cpp
-// Main widget.
+// Path /src/parts/RootPart.cpp
+// Root Part.
 
 
-#include <self/widgets/MainWidget.hpp>
+#include <self/parts/RootPart.hpp>
+
+RootPart::RootPart() = default;
+
+void RootPart::Render()
+{
+}
+
+void RootPart::Update()
+{
+}

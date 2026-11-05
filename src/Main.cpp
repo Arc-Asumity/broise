@@ -10,10 +10,12 @@
 #include <iostream>
 
 #include <self/core/Application.hpp>
+#include <self/parts/RootPart.hpp>
 
 int main(const int argc, char* argv[])
 {
-    auto application = Application::Create("Broise");
+    RootPart root;
+    auto application = Application::Create("Broise", root);
     if (!application) {
         std::cerr << "Failed to create application (error code "
                   << static_cast<int>(application.error()) << ").\n";

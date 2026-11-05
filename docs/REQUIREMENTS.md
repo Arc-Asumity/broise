@@ -15,6 +15,14 @@ The Runtime must not become a Proof Checker-specific UI library. Proof Checker i
 
 A key product idea is that a page/workspace can contain independent widgets from different feature areas. For example, a user may place a Proof Checker writing/editor widget and an Email status widget on the same page. The page is therefore a composition surface, not necessarily a full-screen representation of one application. The Runtime should make this possible without making its core depend on either application.
 
+### Terminology clarification
+
+- A **Part** is a Runtime-provided UI building block. Parts can be nested into Part Trees and represent structural or visual elements such as containers, buttons, text, and images. The Runtime provides the infrastructure for managing, composing, updating, and rendering Parts.
+- **RootPart** is the conceptual root node of a Part Tree. It is not an application-level Widget. Whether RootPart needs a distinct concrete class remains open.
+- A **Widget** is an application- or feature-provided software component, such as a Proof Checker Widget or Email Widget. A Widget may use multiple Parts to construct its UI, but it is not itself a Part or a node in a Part Tree.
+- The Runtime owns the Part system and remains independent of application-specific Widgets. The software-level Widget system, its integration, Workspace, and Page architecture are future design work.
+- The former UI-level `IWidget` and `MainWidget` identifiers referred to the Part concept; their names must not be used to infer a software-level Widget system.
+
 ## 2. Product principles
 
 1. **Shared foundation:** common desktop behavior and visual conventions should be implemented once and reused by multiple applications.

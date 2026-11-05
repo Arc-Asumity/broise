@@ -21,6 +21,14 @@ The most important dependency rule is:
 
 A page is a workspace composition surface. It may contain several widgets from one feature area or combine widgets from different feature modules (for example, a Proof Checker editor widget beside an Email status widget). The Runtime provides the common widget, layout, event, rendering, and theme mechanisms that make this composition possible.
 
+### Terminology clarification
+
+- A **Part** is a Runtime-provided UI building block, such as a container, button, text element, or image. Parts compose into Part Trees; the Runtime provides their management, composition, update, and render infrastructure.
+- **RootPart** is the conceptual root of a Part Tree. It is not a software-level Widget, and whether it needs a distinct concrete class remains open.
+- A **Widget** is an application- or feature-provided functional software component. It may use multiple Parts to build its UI, but it is not a Part or a Part Tree node.
+- The Runtime provides Parts and remains independent of application-specific Widgets. The software-level Widget interface, lifecycle, manager, and ownership system have not been implemented and should not be designed prematurely. Workspace and Page architecture remain future design work.
+- The historical source snapshot used `IWidget` and `MainWidget` for the UI-level Part concept. The current source is being aligned to `IPart` and `RootPart` terminology.
+
 ## 2. Observed repository snapshot
 
 The reviewed `main` branch is a small early skeleton. The repository currently has the following shape:

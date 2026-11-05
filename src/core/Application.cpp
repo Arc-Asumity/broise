@@ -14,7 +14,7 @@
 #include <self/core/Application.hpp>
 
 std::expected<Application, WindowError>
-Application::Create(const char* title)
+Application::Create(const char* title, IPart& root)
 {
     auto window = Window::Create(title);
 
@@ -24,11 +24,13 @@ Application::Create(const char* title)
 
     return Application{
         std::move(*window),
+        root,
     };
 }
 
-Application::Application(Window window)
+Application::Application(Window window, IPart& root)
     : window_(std::move(window))
+    , root_(root)
     , render_(Renderer())
 {
     render_.Init();
@@ -41,8 +43,11 @@ void Application::Run()
 
     while (!window_.ShouldClose()) {
         Window::PollEvents();
+        root_.Update();
 
         glClear(GL_COLOR_BUFFER_BIT);
+
+        root_.Render();
 
         window_.SwapBuffers();
     }

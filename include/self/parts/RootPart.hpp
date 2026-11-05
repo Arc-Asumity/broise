@@ -3,18 +3,18 @@
 // Licensed under the GPLv3 or later.
 // https://github.com/Arc-Asumity/broise
 // ==============================================================
-// Path /include/self/widgets/MainWidget.hpp
-// Header for main widget.
+// Path /include/self/parts/RootPart.hpp
+// Header for the root Part.
 
 
 #pragma once
 
-#include <self/core/IWidget.hpp>
+#include <self/parts/IPart.hpp>
 
-class MainWidget : public IWidget
+class RootPart : public IPart
 {
 public:
-    MainWidget();
+    RootPart();
 
     void Render() override;
     void Update() override;
