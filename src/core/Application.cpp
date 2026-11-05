@@ -44,8 +44,6 @@ void Application::Run()
 
         glClear(GL_COLOR_BUFFER_BIT);
 
-        root_.Render(render_);
-
         window_.SwapBuffers();
     }
 }

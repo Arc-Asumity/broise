@@ -7,6 +7,7 @@
 // Renderer the ui.
 
 
+#include <iostream>
 #include <stdexcept>
 #include <utility>
 #include <vector>

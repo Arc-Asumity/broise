@@ -33,8 +33,3 @@ inline std::ostream& operator<<(std::ostream& os, const Point& point)
               << ", y=" << point.y
               << " }";
 }
-
-inline std::ostream& operator<<(std::ostream& os, const std::vector<Point>& points)
-{
-    return os << points;
-}

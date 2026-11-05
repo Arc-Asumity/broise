@@ -8,6 +8,10 @@
 
 #pragma once
 
+#include <array>
+#include <cstddef>
+#include <ostream>
+#include <utility>
 #include <vector>
 
 #include <self/core/Base.hpp>

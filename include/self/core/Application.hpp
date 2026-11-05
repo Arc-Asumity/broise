@@ -12,7 +12,6 @@
 
 #include <self/core/Window.hpp>
 #include <self/core/Renderer.hpp>
-#include <self/widgets/MainWidget.hpp>
 
 class Application
 {
@@ -33,7 +32,6 @@ private:
     explicit Application(Window window);
 
     Window window_;
-    MainWidget root_;
     Renderer render_;
 
 };
