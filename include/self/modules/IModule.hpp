@@ -12,7 +12,7 @@
 #include <span>
 #include <string_view>
 
-#include <self/widgets/IWidget.hpp>
+#include <self/modules/IWidgetEntry.hpp>
 
 namespace Broise
 {
@@ -22,7 +22,7 @@ namespace Broise
         std::uint32_t minor;
     };
 
-    inline constexpr ApiVersion kModuleApiVersion{1, 0};
+    inline constexpr ApiVersion kModuleApiVersion{.major = 2, .minor = 0};
 
 #define BROISE_MODULE_STRINGIFY_IMPL(value) #value
 #define BROISE_MODULE_STRINGIFY(value) BROISE_MODULE_STRINGIFY_IMPL(value)
@@ -85,13 +85,6 @@ namespace Broise
         std::string_view abi_tag;
     };
 
-    struct WidgetDescriptor
-    {
-        std::string_view id;
-        std::string_view name;
-        std::string_view description;
-    };
-
     struct ModuleContext
     {
         ApiVersion runtime_api_version{kModuleApiVersion};
@@ -103,19 +96,13 @@ namespace Broise
         virtual ~IModule() = default;
 
         [[nodiscard]] virtual ModuleInfo GetInfo() const = 0;
-        [[nodiscard]] virtual std::span<const WidgetDescriptor>
-        GetWidgetDescriptors() const noexcept = 0;
+        [[nodiscard]] virtual std::span<IWidgetEntry* const>
+        GetWidgetEntries() const noexcept = 0;
 
         virtual bool Initialize(const ModuleContext& context) = 0;
-        [[nodiscard]] virtual IWidget* CreateWidget(
-            std::string_view widget_id) = 0;
-        virtual void DestroyWidget(IWidget* widget) noexcept = 0;
 
-        // Returns false if shutdown cannot complete safely. The Runtime must
-        // keep this Module's library loaded until process exit in that case.
         virtual bool Shutdown() noexcept = 0;
 
-        // Destroy the Module object in the library that created it.
         virtual void Destroy() noexcept = 0;
     };
 }
@@ -134,7 +121,5 @@ namespace Broise
 
 namespace Broise
 {
-    // Modules export this C++-linkage factory. Its decorated symbol name is
-    // part of the compiler-specific Module ABI.
     BROISE_MODULE_EXPORT IModule* CreateModuleV1();
 }

@@ -20,7 +20,7 @@ A key product idea is that a page/workspace can contain independent widgets from
 - A **Part** is a Runtime-provided UI building block. Parts can be nested into Part Trees and represent structural or visual elements such as containers, buttons, text, and images. The Runtime provides the infrastructure for managing, composing, updating, and rendering Parts.
 - **RootPart** is the conceptual root node of a Part Tree. It is not an application-level Widget. Whether RootPart needs a distinct concrete class remains open.
 - A **Widget** is an application- or feature-provided software component, such as a Proof Checker Widget or Email Widget. A Widget may use multiple Parts to construct its UI, but it is not itself a Part or a node in a Part Tree.
-- The Runtime owns the Part system and remains independent of application-specific Widgets. The public C++ `IWidget` and `IModule` APIs and initial dynamic `ModuleManager` are defined; Widget hosting, live-instance lifecycle, Workspace, and Page integration remain future work.
+- The Runtime owns the Part system and remains independent of application-specific Widgets. The public C++ `IWidget`, `IWidgetEntry`, and `IModule` APIs, dynamic Module loading, Widget instance management, and initial Application Widget hosting path are implemented. Workspace and Page integration remain future work.
 - In the historical implementation, `IWidget` and `MainWidget` named UI-level Part concepts. The current `IWidget` is the distinct software-level Widget API; Parts use `IPart` terminology.
 
 ## 2. Product principles

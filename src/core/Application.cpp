@@ -7,6 +7,7 @@
 // Application for software.
 
 
+#include <algorithm>
 #include <iostream>
 #include <utility>
 
@@ -24,11 +25,14 @@ Application::Create(const char* title, Style style,
         return std::unexpected(window.error());
     }
 
-    return Application{
+    Application application{
         std::move(*window),
         std::move(style),
         std::move(module_directories),
     };
+    application.module_manager_.DiscoverAndLoad(
+        application.module_directories_);
+    return std::move(application);
 }
 
 Application::Application(
@@ -48,9 +52,35 @@ const Broise::ModuleManager& Application::GetModuleManager() const noexcept
     return module_manager_;
 }
 
+Broise::ModuleManager& Application::GetModuleManager() noexcept
+{
+    return module_manager_;
+}
+
+Broise::IWidget* Application::AddWidget(
+    const std::string_view module_id, const std::string_view widget_id)
+{
+    Broise::IWidget* widget = module_manager_.CreateWidget(module_id, widget_id);
+    if (widget != nullptr) {
+        AddWidget(*widget);
+    }
+    return widget;
+}
+
+void Application::AddWidget(Broise::IWidget& widget)
+{
+    if (std::find(widgets_.begin(), widgets_.end(), &widget) == widgets_.end()) {
+        widgets_.push_back(&widget);
+    }
+}
+
+void Application::RemoveWidget(Broise::IWidget& widget) noexcept
+{
+    std::erase(widgets_, &widget);
+}
+
 void Application::Run()
 {
-    module_manager_.DiscoverAndLoad(module_directories_);
     for (const Broise::ModuleDiagnostic& diagnostic :
          module_manager_.GetDiagnostics()) {
         std::cerr << "Module load error ["
@@ -67,6 +97,9 @@ void Application::Run()
         Window::PollEvents();
         window_.UpdateTitleBarInput();
         root_.Update();
+        for (Broise::IWidget* widget : widgets_) {
+            widget->Update();
+        }
 
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -82,6 +115,9 @@ void Application::Run()
                 window_.GetTitleBarControlWidth()),
         };
         root_.Render(render_context);
+        for (Broise::IWidget* widget : widgets_) {
+            widget->GetRootPart().Render(render_context);
+        }
 
         window_.SwapBuffers();
     }

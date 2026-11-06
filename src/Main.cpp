@@ -7,6 +7,7 @@
 // Main of Broise.
 
 #include <exception>
+#include <filesystem>
 #include <iostream>
 #include <utility>
 
@@ -21,7 +22,13 @@ int main(const int argc, char* argv[])
         return 1;
     }
 
-    auto application = Application::Create("Broise", std::move(*style));
+#ifndef BROISE_MODULE_DIRECTORY
+#error "The DefaultModule directory must be provided by the CMake target"
+#endif
+
+    auto application = Application::Create(
+        "Broise", std::move(*style),
+        {std::filesystem::path{BROISE_MODULE_DIRECTORY}});
     if (!application) {
         std::cerr << "Failed to create application (error code "
                   << static_cast<int>(application.error()) << ").\n";

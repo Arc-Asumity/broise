@@ -12,6 +12,7 @@
 #include <memory>
 #include <span>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <self/modules/IModule.hpp>
@@ -30,6 +31,7 @@ namespace Broise
         DuplicateModuleId,
         DuplicateWidgetId,
         InitializationFailed,
+        WidgetCreationFailed,
         ShutdownFailed,
     };
 
@@ -72,6 +74,12 @@ namespace Broise
         // Scans configured directories recursively. A failed candidate is
         // recorded and does not prevent other candidates from loading.
         void DiscoverAndLoad(std::span<const std::filesystem::path> directories);
+
+        // Returns a non-owning pointer. The ModuleManager owns the instance
+        // and destroys it before shutting down its providing Module.
+        [[nodiscard]] IWidget* CreateWidget(std::string_view module_id,
+                                            std::string_view widget_id);
+        void DestroyWidget(IWidget& widget) noexcept;
 
         [[nodiscard]] std::span<const LoadedModuleInfo>
         GetLoadedModules() const noexcept;

@@ -41,6 +41,14 @@ namespace
         DynamicLibrary library;
         Broise::IModule* module{};
         std::filesystem::path path;
+        std::string id;
+    };
+
+    struct WidgetInstance
+    {
+        Broise::IWidget* widget{};
+        Broise::IWidgetEntry* entry{};
+        std::string module_id;
     };
 
     std::vector<ModuleRecord>& PinnedModules()
@@ -168,6 +176,7 @@ public:
         }
 
         const std::string module_id{module_info.id};
+        record.id = module_id;
         if (module_ids.contains(module_id)) {
             AddDiagnostic(path, ModuleDiagnosticCode::DuplicateModuleId,
                           "Another candidate already uses Module ID '"
@@ -184,27 +193,27 @@ public:
             .api_version = module_info.api_version,
         };
         std::set<std::string> widget_ids;
-        for (const Broise::WidgetDescriptor& descriptor :
-             record.module->GetWidgetDescriptors()) {
-            if (!IsValidIdentifier(descriptor.id) || descriptor.name.empty()) {
+        for (Broise::IWidgetEntry* entry : record.module->GetWidgetEntries()) {
+            if (entry == nullptr || !IsValidIdentifier(entry->GetId())
+                || entry->GetName().empty()) {
                 AddDiagnostic(path, ModuleDiagnosticCode::InvalidMetadata,
-                              "A Widget descriptor has an empty or invalid ID/name");
+                              "A Widget Entry has an empty or invalid ID/name");
                 record.module->Destroy();
                 return;
             }
 
-            std::string widget_id{descriptor.id};
+            std::string widget_id{entry->GetId()};
             if (!widget_ids.insert(widget_id).second) {
                 AddDiagnostic(path, ModuleDiagnosticCode::DuplicateWidgetId,
-                              "Module contains duplicate Widget ID '"
+                              "Module contains duplicate Widget Entry ID '"
                                   + widget_id + "'");
                 record.module->Destroy();
                 return;
             }
             loaded_info.widgets.push_back({
                 std::move(widget_id),
-                std::string{descriptor.name},
-                std::string{descriptor.description},
+                std::string{entry->GetName()},
+                std::string{entry->GetDescription()},
             });
         }
 
@@ -291,12 +300,92 @@ public:
         }
     }
 
+    Broise::IWidget* CreateWidget(const std::string_view module_id,
+                                  const std::string_view widget_id)
+    {
+        if (shutdown) {
+            return nullptr;
+        }
+
+        const auto module = std::find_if(
+            modules.begin(), modules.end(), [module_id](const ModuleRecord& record) {
+                return record.id == module_id;
+            });
+        if (module == modules.end()) {
+            return nullptr;
+        }
+
+        const auto entries = module->module->GetWidgetEntries();
+        const auto entry = std::find_if(
+            entries.begin(), entries.end(),
+            [widget_id](const Broise::IWidgetEntry* candidate) {
+                return candidate != nullptr && candidate->GetId() == widget_id;
+            });
+        if (entry == entries.end()) {
+            return nullptr;
+        }
+
+        Broise::IWidget* widget = nullptr;
+        try {
+            widget = (*entry)->Create();
+        } catch (const std::exception& error) {
+            AddDiagnostic(module->path, ModuleDiagnosticCode::WidgetCreationFailed,
+                          error.what());
+            return nullptr;
+        } catch (...) {
+            AddDiagnostic(module->path, ModuleDiagnosticCode::WidgetCreationFailed,
+                          "Widget factory threw an unknown exception");
+            return nullptr;
+        }
+
+        if (widget == nullptr) {
+            AddDiagnostic(module->path, ModuleDiagnosticCode::WidgetCreationFailed,
+                          "Widget factory returned null");
+            return nullptr;
+        }
+
+        widget_instances.push_back({widget, *entry, module->id});
+        return widget;
+    }
+
+    void DestroyWidget(Broise::IWidget& widget) noexcept
+    {
+        const auto instance = std::find_if(
+            widget_instances.begin(), widget_instances.end(),
+            [&widget](const WidgetInstance& candidate) {
+                return candidate.widget == &widget;
+            });
+        if (instance == widget_instances.end()) {
+            return;
+        }
+
+        const auto module = std::find_if(
+            modules.begin(), modules.end(), [&instance](const ModuleRecord& record) {
+                return record.id == instance->module_id;
+            });
+        if (module != modules.end()) {
+            instance->entry->Destroy(instance->widget);
+        }
+        widget_instances.erase(instance);
+    }
+
     void Shutdown() noexcept
     {
         if (shutdown) {
             return;
         }
         shutdown = true;
+
+        for (const WidgetInstance& instance : widget_instances) {
+            const auto module = std::find_if(
+                modules.begin(), modules.end(), [&instance](const ModuleRecord& record) {
+                    return record.id == instance.module_id;
+                });
+            if (module != modules.end()) {
+                instance.entry->Destroy(instance.widget);
+            }
+        }
+        widget_instances.clear();
 
         for (ModuleRecord& record : modules) {
             bool stopped = false;
@@ -329,6 +418,7 @@ public:
     std::vector<Broise::LoadedModuleInfo> loaded_modules;
     std::vector<Broise::ModuleDiagnostic> diagnostics;
     std::set<std::string> module_ids;
+    std::vector<WidgetInstance> widget_instances;
     bool shutdown{};
 };
 
@@ -347,6 +437,19 @@ void Broise::ModuleManager::DiscoverAndLoad(
 {
     if (impl_) {
         impl_->DiscoverAndLoad(directories);
+    }
+}
+
+Broise::IWidget* Broise::ModuleManager::CreateWidget(
+    const std::string_view module_id, const std::string_view widget_id)
+{
+    return impl_ ? impl_->CreateWidget(module_id, widget_id) : nullptr;
+}
+
+void Broise::ModuleManager::DestroyWidget(Broise::IWidget& widget) noexcept
+{
+    if (impl_) {
+        impl_->DestroyWidget(widget);
     }
 }
 

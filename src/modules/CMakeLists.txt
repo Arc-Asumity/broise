@@ -10,6 +10,7 @@ add_library(Broise_ModuleManager STATIC
     DynamicLibrary.cpp
     ModuleManager.cpp
 )
+set_target_properties(Broise_ModuleManager PROPERTIES POSITION_INDEPENDENT_CODE ON)
 add_library(Broise::ModuleManager ALIAS Broise_ModuleManager)
 target_include_directories(Broise_ModuleManager
     PUBLIC

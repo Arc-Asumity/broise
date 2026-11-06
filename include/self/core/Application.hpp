@@ -10,6 +10,7 @@
 
 #include <expected>
 #include <filesystem>
+#include <string_view>
 #include <vector>
 
 #include <self/core/Window.hpp>
@@ -17,6 +18,7 @@
 #include <self/core/Style.hpp>
 #include <self/modules/ModuleManager.hpp>
 #include <self/parts/RootPart.hpp>
+#include <self/widgets/IWidget.hpp>
 
 class Application
 {
@@ -34,11 +36,21 @@ public:
     Application& operator=(Application&&) noexcept = default;
 
     [[nodiscard]] const Broise::ModuleManager& GetModuleManager() const noexcept;
+    [[nodiscard]] Broise::ModuleManager& GetModuleManager() noexcept;
+
+    [[nodiscard]] Broise::IWidget*
+    AddWidget(std::string_view module_id, std::string_view widget_id);
+
+    void AddWidget(Broise::IWidget& widget);
+    void RemoveWidget(Broise::IWidget& widget) noexcept;
     void Run();
 
 private:
-    explicit Application(Window window, Style style,
-                         std::vector<std::filesystem::path> module_directories);
+    explicit Application(
+        Window window,
+        Style style,
+        std::vector<std::filesystem::path> module_directories
+    );
 
     Window window_;
     Renderer render_;
@@ -46,6 +58,7 @@ private:
     Broise::ModuleManager module_manager_;
     std::vector<std::filesystem::path> module_directories_;
     RootPart root_;
+    std::vector<Broise::IWidget*> widgets_;
 
 };
 

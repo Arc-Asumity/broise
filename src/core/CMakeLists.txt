@@ -1,9 +1,29 @@
-add_library(Broise_Runtime Application.cpp Window.cpp Rect.cpp Renderer.cpp Style.cpp FontRenderer.cpp)
+add_library(Broise_Runtime SHARED
+    Application.cpp
+    Window.cpp
+    Rect.cpp
+    Renderer.cpp
+    Style.cpp
+    FontRenderer.cpp
+)
 add_library(Broise::Runtime ALIAS Broise_Runtime)
+get_filename_component(BROISE_RUNTIME_OUTPUT_DIRECTORY
+    "${CMAKE_CURRENT_BINARY_DIR}/.." ABSOLUTE)
+set_target_properties(Broise_Runtime PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+set_target_properties(Broise_Runtime PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${BROISE_RUNTIME_OUTPUT_DIRECTORY}")
+target_compile_features(Broise_Runtime PUBLIC cxx_std_23)
 target_include_directories(Broise_Runtime
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
 )
-target_link_libraries(Broise_Runtime PUBLIC Broise::OpenGL Broise::Parts
-    Broise::ModuleManager
-    PRIVATE tomlplusplus::tomlplusplus freetype)
+target_link_libraries(Broise_Runtime
+    PUBLIC
+        Broise::OpenGL
+        Broise::ModuleAPI
+    PRIVATE
+        Broise::Parts
+        Broise::ModuleManager
+        tomlplusplus::tomlplusplus
+        freetype
+)
