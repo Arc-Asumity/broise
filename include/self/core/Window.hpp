@@ -33,6 +33,7 @@ public:
 
     static void PollEvents();
     void SwapBuffers() const;
+    void UpdateTitleBarInput();
 
     [[nodiscard]]
     bool ShouldClose() const;
@@ -45,6 +46,10 @@ public:
 
     [[nodiscard]] int GetWidth() const;
     [[nodiscard]] int GetHeight() const;
+    [[nodiscard]] int GetLogicalWidth() const;
+    [[nodiscard]] int GetLogicalHeight() const;
+    [[nodiscard]] int GetTitleBarHeight() const;
+    [[nodiscard]] int GetTitleBarControlWidth() const;
 
     static void FramebufferSizeCallback(
         GLFWwindow* window, const int width, const int height)
@@ -64,6 +69,12 @@ private:
 
     int width_{};
     int height_{};
+    bool left_mouse_was_down_{};
+    bool dragging_title_bar_{};
+    int drag_start_window_x_{};
+    int drag_start_window_y_{};
+    double drag_start_cursor_x_{};
+    double drag_start_cursor_y_{};
 
     Window() = default;
 

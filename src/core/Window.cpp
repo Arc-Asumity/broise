@@ -7,6 +7,7 @@
 // Window for Broise.
 
 
+#include <algorithm>
 #include <glad/gl.h>
 #include <utility>
 
@@ -35,6 +36,7 @@ Window::Create(const char* title)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
 
     auto* window = glfwCreateWindow(
         static_cast<int>(static_cast<float>(mode->width) * kScale),
@@ -113,6 +115,53 @@ void Window::SwapBuffers() const
     glfwSwapBuffers(window_);
 }
 
+void Window::UpdateTitleBarInput()
+{
+    const bool left_mouse_is_down =
+        glfwGetMouseButton(window_, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
+    double cursor_x = 0.0;
+    double cursor_y = 0.0;
+    glfwGetCursorPos(window_, &cursor_x, &cursor_y);
+
+    int window_width = 0;
+    int window_height = 0;
+    glfwGetWindowSize(window_, &window_width, &window_height);
+
+    int window_x = 0;
+    int window_y = 0;
+    glfwGetWindowPos(window_, &window_x, &window_y);
+
+    const auto title_bar_height = static_cast<double>(GetTitleBarHeight());
+    const auto control_width = static_cast<double>(GetTitleBarControlWidth());
+    if (left_mouse_is_down && !left_mouse_was_down_ && cursor_y < title_bar_height) {
+        if (cursor_x >= window_width - control_width) {
+            glfwSetWindowShouldClose(window_, GLFW_TRUE);
+        } else if (cursor_x >= window_width - 2.0 * control_width) {
+            glfwIconifyWindow(window_);
+        } else {
+            dragging_title_bar_ = true;
+            drag_start_window_x_ = window_x;
+            drag_start_window_y_ = window_y;
+            drag_start_cursor_x_ = static_cast<double>(window_x) + cursor_x;
+            drag_start_cursor_y_ = static_cast<double>(window_y) + cursor_y;
+        }
+    }
+
+    if (!left_mouse_is_down) {
+        dragging_title_bar_ = false;
+    } else if (dragging_title_bar_) {
+        const double cursor_screen_x = static_cast<double>(window_x) + cursor_x;
+        const double cursor_screen_y = static_cast<double>(window_y) + cursor_y;
+        glfwSetWindowPos(
+            window_,
+            drag_start_window_x_ + static_cast<int>(cursor_screen_x - drag_start_cursor_x_),
+            drag_start_window_y_ + static_cast<int>(cursor_screen_y - drag_start_cursor_y_)
+        );
+    }
+
+    left_mouse_was_down_ = left_mouse_is_down;
+}
+
 bool Window::ShouldClose() const
 {
     return glfwWindowShouldClose(window_);
@@ -158,4 +207,30 @@ int Window::GetWidth() const
 int Window::GetHeight() const
 {
     return height_;
+}
+
+int Window::GetLogicalWidth() const
+{
+    int width = 0;
+    int height = 0;
+    glfwGetWindowSize(window_, &width, &height);
+    return width;
+}
+
+int Window::GetLogicalHeight() const
+{
+    int width = 0;
+    int height = 0;
+    glfwGetWindowSize(window_, &width, &height);
+    return height;
+}
+
+int Window::GetTitleBarHeight() const
+{
+    return std::clamp(GetLogicalHeight() / 18, 36, 80);
+}
+
+int Window::GetTitleBarControlWidth() const
+{
+    return GetTitleBarHeight() * 3 / 2;
 }
