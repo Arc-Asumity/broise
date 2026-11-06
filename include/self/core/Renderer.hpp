@@ -8,12 +8,18 @@
 
 #pragma once
 
+#include <memory>
+#include <string_view>
+
 #include <self/core/Base.hpp>
+#include <self/core/Style.hpp>
+
+class FontRenderer;
 
 class Renderer
 {
 public:
-    Renderer() = default;
+    Renderer();
     ~Renderer();
 
     Renderer(const Renderer&) = delete;
@@ -24,9 +30,13 @@ public:
 
     void Init();
     void RenderPolygon(const PointSet& points, const Color& color) const;
+    void RenderText(std::string_view text, const FontStyle& font,
+                    float x, float y, float width, float height,
+                    const Color& color);
 
 private:
     unsigned int program_{};
     unsigned int vao_{};
     unsigned int vbo_{};
+    std::unique_ptr<FontRenderer> font_renderer_;
 };

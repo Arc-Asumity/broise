@@ -8,14 +8,20 @@
 
 #include <exception>
 #include <iostream>
+#include <utility>
 
 #include <self/core/Application.hpp>
-#include <self/parts/RootPart.hpp>
 
 int main(const int argc, char* argv[])
 {
-    RootPart root;
-    auto application = Application::Create("Broise", root);
+    const auto style_path = argc > 1 ? argv[1] : "test/config/style.toml";
+    auto style = Style::Load(style_path);
+    if (!style) {
+        std::cerr << "Failed to load style: " << style.error() << '\n';
+        return 1;
+    }
+
+    auto application = Application::Create("Broise", std::move(*style));
     if (!application) {
         std::cerr << "Failed to create application (error code "
                   << static_cast<int>(application.error()) << ").\n";

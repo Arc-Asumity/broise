@@ -1,0 +1,34 @@
+// ==============================================================
+// Copyright (c) 2026 Arc Asumity
+// Licensed under the GPLv3 or later.
+// https://github.com/Arc-Asumity/broise
+// ==============================================================
+// Style values loaded from a TOML configuration file.
+
+#pragma once
+
+#include <expected>
+#include <filesystem>
+#include <string>
+#include <unordered_map>
+
+#include <self/core/Base.hpp>
+
+struct FontStyle
+{
+    std::filesystem::path file;
+    float size{};
+};
+
+struct Style
+{
+    Color background_color{};
+    Color title_bar_color{};
+    Color title_bar_button_color{};
+    Color close_button_color{};
+    Color title_bar_icon_color{};
+    std::unordered_map<std::string, FontStyle> fonts;
+
+    [[nodiscard]] static std::expected<Style, std::string>
+    Load(const std::filesystem::path& path);
+};

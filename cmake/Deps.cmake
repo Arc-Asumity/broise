@@ -29,6 +29,30 @@ add_library(Broise::GLAD ALIAS Broise_GLAD)
 
 find_package(OpenGL REQUIRED)
 
+FetchContent_Declare(
+        tomlplusplus
+        GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
+        GIT_TAG v3.4.0
+        GIT_SHALLOW TRUE
+)
+
+FetchContent_MakeAvailable(tomlplusplus)
+
+set(FT_DISABLE_BZIP2 ON)
+set(FT_DISABLE_BROTLI ON)
+set(FT_DISABLE_HARFBUZZ ON)
+set(FT_DISABLE_HVF ON)
+set(FT_DISABLE_PNG ON)
+set(FT_DISABLE_ZLIB ON)
+
+FetchContent_Declare(
+        freetype
+        GIT_REPOSITORY https://github.com/freetype/freetype.git
+        GIT_TAG VER-2-14-3
+        GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(freetype)
+
 add_library(Broise_OpenGL INTERFACE)
 target_link_libraries(
         Broise_OpenGL

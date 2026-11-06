@@ -13,7 +13,7 @@
 #include <self/core/Application.hpp>
 
 std::expected<Application, WindowError>
-Application::Create(const char* title, IPart& root)
+Application::Create(const char* title, Style style)
 {
     auto window = Window::Create(title);
 
@@ -23,21 +23,23 @@ Application::Create(const char* title, IPart& root)
 
     return Application{
         std::move(*window),
-        root,
+        std::move(style),
     };
 }
 
-Application::Application(Window window, IPart& root)
+Application::Application(Window window, Style style)
     : window_(std::move(window))
-    , root_(root)
     , render_(Renderer())
+    , style_(std::move(style))
+    , root_()
 {
     render_.Init();
 }
 
 void Application::Run()
 {
-    glClearColor(0, 0, 0, 1);
+    glClearColor(style_.background_color.r, style_.background_color.g,
+                 style_.background_color.b, style_.background_color.a);
 
 
     while (!window_.ShouldClose()) {
@@ -63,50 +65,32 @@ void Application::Run()
         };
 
         draw_rect(0.0f, 0.0f, 1.0f, title_bar_height,
-                  Color{0.12f, 0.13f, 0.15f, 1.0f});
+                  style_.title_bar_color);
 
-        const float glyph_pixel_width = title_bar_pixels / 10.0f;
-        const float glyph_pixel_height = title_bar_pixels / 10.0f;
-        const float glyph_margin = title_bar_pixels * 0.6f;
-        const float glyph_top = (title_bar_pixels - 5.0f * glyph_pixel_height) / 2.0f;
-        for (int glyph = 0; glyph < 6; ++glyph) {
-            for (int row = 0; row < 5; ++row) {
-                for (int column = 0; column < 3; ++column) {
-                    constexpr unsigned char title_glyphs[6][5] = {
-                        {0b110, 0b101, 0b110, 0b101, 0b110}, // B
-                        {0b000, 0b110, 0b100, 0b100, 0b100}, // r
-                        {0b000, 0b110, 0b101, 0b101, 0b110}, // o
-                        {0b010, 0b000, 0b010, 0b010, 0b010}, // i
-                        {0b000, 0b011, 0b100, 0b010, 0b110}, // s
-                        {0b010, 0b100, 0b110, 0b100, 0b010}, // e
-                    };
-                    if ((title_glyphs[glyph][row] & (1 << (2 - column))) == 0) {
-                        continue;
-                    }
-                    const float left = (glyph_margin + static_cast<float>(glyph) * 4.0f * glyph_pixel_width
-                                        + static_cast<float>(column) * glyph_pixel_width) / window_width;
-                    const float top = (glyph_top + static_cast<float>(row) * glyph_pixel_height) / window_height;
-                    draw_rect(left, top,
-                              left + glyph_pixel_width / window_width,
-                              top + glyph_pixel_height / window_height,
-                              Color{0.88f, 0.89f, 0.92f, 1.0f});
-                }
-            }
-        }
+        const FontStyle& title_font = style_.fonts.at("title");
+        const float title_font_size = title_font.size * title_bar_pixels / 32.0f;
+        const float title_y = (title_bar_pixels - title_font_size) / 2.0f;
+        const FontStyle scaled_title_font{
+            .file = title_font.file,
+            .size = title_font_size,
+        };
+        render_.RenderText("Broise", scaled_title_font, title_bar_pixels * 0.6f,
+                           title_y, window_width, window_height,
+                           style_.title_bar_icon_color);
 
         draw_rect(1.0f - 2.0f * control_width / window_width, 0.0f,
                   1.0f - control_width / window_width, title_bar_height,
-                  Color{0.16f, 0.17f, 0.19f, 1.0f});
+                  style_.title_bar_button_color);
         draw_rect(1.0f - control_width / window_width, 0.0f,
                   1.0f, title_bar_height,
-                  Color{0.65f, 0.12f, 0.14f, 1.0f});
+                  style_.close_button_color);
 
         const float icon_half_width = title_bar_pixels * 0.14f / window_width;
         const float icon_half_height = title_bar_pixels * 0.035f / window_height;
         const float icon_center_y = title_bar_height / 2.0f;
         const float minimize_center_x = 1.0f - 1.5f * control_width / window_width;
         const float close_center_x = 1.0f - 0.5f * control_width / window_width;
-        constexpr Color icon_color{0.92f, 0.93f, 0.95f, 1.0f};
+        const Color& icon_color = style_.title_bar_icon_color;
         draw_rect(minimize_center_x - icon_half_width,
                   icon_center_y - icon_half_height,
                   minimize_center_x + icon_half_width,

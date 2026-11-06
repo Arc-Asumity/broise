@@ -12,13 +12,14 @@
 
 #include <self/core/Window.hpp>
 #include <self/core/Renderer.hpp>
-#include <self/parts/IPart.hpp>
+#include <self/core/Style.hpp>
+#include <self/parts/RootPart.hpp>
 
 class Application
 {
 public:
     static std::expected<Application, WindowError>
-    Create(const char* title, IPart& root);
+    Create(const char* title, Style style);
 
     ~Application() = default;
 
@@ -31,11 +32,12 @@ public:
     void Run();
 
 private:
-    explicit Application(Window window, IPart& root);
+    explicit Application(Window window, Style style);
 
     Window window_;
-    IPart& root_;
     Renderer render_;
+    Style style_;
+    RootPart root_;
 
 };
 

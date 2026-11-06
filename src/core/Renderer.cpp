@@ -14,10 +14,15 @@
 
 #include <self/core/Renderer.hpp>
 
+#include "FontRenderer.hpp"
+
+Renderer::Renderer() = default;
+
 Renderer::Renderer(Renderer&& other) noexcept
     : program_(std::exchange(other.program_, 0)),
       vao_(std::exchange(other.vao_, 0)),
-      vbo_(std::exchange(other.vbo_, 0))
+      vbo_(std::exchange(other.vbo_, 0)),
+      font_renderer_(std::move(other.font_renderer_))
 {}
 
 Renderer& Renderer::operator=(Renderer&& other) noexcept
@@ -41,6 +46,7 @@ Renderer& Renderer::operator=(Renderer&& other) noexcept
     program_ = std::exchange(other.program_, 0);
     vao_ = std::exchange(other.vao_, 0);
     vbo_ = std::exchange(other.vbo_, 0);
+    font_renderer_ = std::move(other.font_renderer_);
 
     return *this;
 }
@@ -208,4 +214,15 @@ void Renderer::RenderPolygon(const PointSet& points, const Color& color) const
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
     glUseProgram(0);
+}
+
+void Renderer::RenderText(
+    const std::string_view text, const FontStyle& font,
+    const float x, const float y, const float width, const float height,
+    const Color& color)
+{
+    if (!font_renderer_) {
+        font_renderer_ = std::make_unique<FontRenderer>();
+    }
+    font_renderer_->Render(text, font, x, y, width, height, color);
 }

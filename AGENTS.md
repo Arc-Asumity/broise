@@ -49,6 +49,7 @@ Use the following terms precisely; Parts and software Widgets are separate conce
 
 ## 5. Coding practices
 
+- Follow the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html) for C++ formatting and naming, with the repository's C++23 target and explicit project constraints taking precedence where they differ. Use the repository `.clang-format` configuration for formatting.
 - Keep public headers focused. Include what a header needs; avoid gratuitous forward declarations and avoid creating include cycles.
 - Keep implementation details in `.cpp` files where practical, especially OpenGL calls and GLFW callbacks.
 - Use clear names and explicit types. Follow the established naming style unless a focused change has a clear reason to adjust it.
