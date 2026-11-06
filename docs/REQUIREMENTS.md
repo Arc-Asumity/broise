@@ -20,8 +20,8 @@ A key product idea is that a page/workspace can contain independent widgets from
 - A **Part** is a Runtime-provided UI building block. Parts can be nested into Part Trees and represent structural or visual elements such as containers, buttons, text, and images. The Runtime provides the infrastructure for managing, composing, updating, and rendering Parts.
 - **RootPart** is the conceptual root node of a Part Tree. It is not an application-level Widget. Whether RootPart needs a distinct concrete class remains open.
 - A **Widget** is an application- or feature-provided software component, such as a Proof Checker Widget or Email Widget. A Widget may use multiple Parts to construct its UI, but it is not itself a Part or a node in a Part Tree.
-- The Runtime owns the Part system and remains independent of application-specific Widgets. The software-level Widget system, its integration, Workspace, and Page architecture are future design work.
-- The former UI-level `IWidget` and `MainWidget` identifiers referred to the Part concept; their names must not be used to infer a software-level Widget system.
+- The Runtime owns the Part system and remains independent of application-specific Widgets. The public C++ `IWidget` and `IModule` APIs and initial dynamic `ModuleManager` are defined; Widget hosting, live-instance lifecycle, Workspace, and Page integration remain future work.
+- In the historical implementation, `IWidget` and `MainWidget` named UI-level Part concepts. The current `IWidget` is the distinct software-level Widget API; Parts use `IPart` terminology.
 
 ## 2. Product principles
 
@@ -134,6 +134,10 @@ Window, graphics-context, renderer, and other essential initialization failures 
 
 The Runtime shall distinguish logical UI dimensions from framebuffer pixel dimensions where needed. Resizing and high-DPI displays must not make layout geometry or input hit testing inconsistent. This may be implemented progressively, but the coordinate model must not prevent it.
 
+### FR-12 — Native C++ Modules
+
+The Runtime shall discover native C++ Module libraries in configurable directories, validate their API and toolchain ABI metadata, initialize compatible Modules independently, and report per-Module failures. Modules expose Widget descriptors and factories through the public C++ API. The Runtime must keep Module code loaded while Module objects, Widget instances, or callbacks may still use it. The initial ABI policy may require an exact supported compiler, standard library, architecture, and build configuration; it must not claim arbitrary cross-toolchain compatibility.
+
 ## 5. Non-functional requirements
 
 - **Maintainability:** modules have clear responsibilities and one-way dependencies.
@@ -158,7 +162,7 @@ The following are constraints for the current direction:
 The following are **not required for the first milestone** unless explicitly requested:
 
 - A dynamic cross-process application embedding system.
-- A stable third-party binary plugin ABI or a cross-language C ABI.
+- A toolchain-independent binary Module ABI or a C-linkage plugin API. Native C++ Modules follow the explicitly supported Broise toolchain ABI.
 - A web-based frontend or embedded browser runtime.
 - A complete CSS-like layout engine.
 - Advanced text shaping, rich document editing, or accessibility APIs in the first rendering pass.
@@ -166,7 +170,7 @@ The following are **not required for the first milestone** unless explicitly req
 - Complex GPU effects, desktop blur, or platform-specific glass effects.
 - A full application launcher, package manager, or operating-system shell.
 
-Feature modules may initially be ordinary C++ code linked into the consumer executable. A plugin/factory registration mechanism can be designed later if a real use case requires it.
+Modules are native C++ dynamic libraries discovered by the Runtime. They use a compiler-ABI-specific C++ entry point and must follow the supported toolchain policy; no C-linkage plugin API is used. Static linking may still be used for ordinary consumer features, but it does not replace dynamic Module discovery.
 
 ## 7. Suggested implementation milestones
 
@@ -200,7 +204,7 @@ Feature modules may initially be ordinary C++ code linked into the consumer exec
 - Better DPI and resize behavior.
 - Widget lifecycle, event ordering, and ownership tests.
 - Refined public CMake targets and consumer integration examples.
-- Decide whether a C++ module/widget factory or plugin mechanism is actually necessary.
+- Complete native C++ Module discovery, Widget factories, and safe lifecycle integration under the supported toolchain ABI.
 
 ## 8. Acceptance criteria for the first meaningful release
 

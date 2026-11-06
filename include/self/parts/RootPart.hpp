@@ -10,12 +10,16 @@
 #pragma once
 
 #include <self/parts/IPart.hpp>
+#include <self/parts/TitleBarPart.hpp>
 
 class RootPart : public IPart
 {
 public:
     RootPart();
 
-    void Render() override;
+    void Render(const PartRenderContext& context) override;
     void Update() override;
+
+private:
+    TitleBarPart title_bar_;
 };

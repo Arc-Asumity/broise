@@ -7,8 +7,8 @@ if (CMAKE_BUILD_TYPE STREQUAL "Release")
 endif ()
 
 add_subdirectory(parts)
+add_subdirectory(modules)
 add_subdirectory(core)
-target_include_directories(Broise PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(Broise PRIVATE Broise::Runtime)
 
 add_custom_command(TARGET Broise POST_BUILD

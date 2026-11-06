@@ -11,8 +11,9 @@
 
 RootPart::RootPart() = default;
 
-void RootPart::Render()
+void RootPart::Render(const PartRenderContext& context)
 {
+    title_bar_.Render(context);
 }
 
 void RootPart::Update()

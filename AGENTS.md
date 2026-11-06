@@ -32,9 +32,10 @@ Use the following terms precisely; Parts and software Widgets are separate conce
 - The Runtime provides the Part system and must remain independent of application-specific software Widgets. Feature modules provide those Widgets and may depend on the Runtime's Part APIs.
 - Do not conflate Widget composition with Part composition. Do not assume Application directly owns or represents one application-specific Widget.
 - Workspace and Page architecture will be considered separately in a later development stage.
-- The software-level Widget system has not been implemented. Do not prematurely introduce its interface, lifecycle, manager, or ownership system.
+- The public software-level `Broise::IWidget` and `Broise::IModule` interfaces are defined under `include/self/widgets/IWidget.hpp` and `include/self/modules/IModule.hpp`. Modules expose metadata and Widget descriptors and provide Widget factories; they use a native C++ entry point with compiler-specific symbol naming, not C linkage.
+- `ModuleManager` discovers, validates, initializes, and shuts down native Modules. Widget instance management, live-instance tracking, Workspace integration, and broader application-level Widget ownership remain separate implementation stages.
 - The exact design of RootPart, Part ownership and tree management, Widget integration, Workspace, and Page remains open until a relevant design stage.
-- Existing UI-level identifiers such as `IWidget` still refer to the Part concept for now. Do not rename source files, classes, or identifiers unless a task explicitly requests those changes; do not let this legacy terminology dictate future architecture.
+- Historical source used `IWidget` for the UI-level Part concept; the current Part interface is `IPart`. The current `IWidget` API denotes a software-level Widget and must not be confused with that historical usage.
 
 ## 4. Ownership and lifetime
 
@@ -43,7 +44,7 @@ Use the following terms precisely; Parts and software Widgets are separate conce
 - Never use an owning raw pointer as a shortcut.
 - Do not introduce `std::unique_ptr` mechanically for every object. For heterogeneous, dynamically owned polymorphic objects, choose an explicit safe ownership representation, explain why it is necessary, and keep it encapsulated behind the relevant container API.
 - When implementing Part Trees, make Part ownership explicit: a parent/container should clearly own its children, while parent links, event targets, and lookup results should be non-owning. Do not decide or implement Part Tree ownership mechanisms prematurely.
-- Do not impose ownership rules for application-level Widgets before that separate system is designed.
+- Widget descriptors are copied into the Runtime registry; Widget instances are created and destroyed by their providing Module. Keep each Module library loaded while any of its objects or code may still be used. The Module ABI is compiler/toolchain-specific and validated by API version, ABI tag, and architecture; do not claim cross-toolchain compatibility. Do not add a different internal ownership mechanism or broader Workspace ownership rules without updating the API design.
 - OpenGL resources must be released while a valid OpenGL context is still current. Preserve and document destruction order.
 - GLFW initialization and termination must have a well-defined lifetime. Do not accidentally terminate GLFW while other windows still depend on it.
 
@@ -58,7 +59,19 @@ Use the following terms precisely; Parts and software Widgets are separate conce
 - Do not implement an application-specific feature inside the Runtime merely to make a demo easier.
 - Avoid premature optimization, but do not introduce obviously wasteful ownership or lifecycle patterns without reason.
 
-## 6. Change discipline
+## 6. C++ Header Organization
+
+- Every C++ `.hpp` file belongs under `include/`.
+- Public headers belong under `include/self/` and define the supported interface available to Runtime consumers.
+- Private headers belong under `include/internal/` and are implementation details; do not install them or make them part of the public API.
+- Every C++ `.cpp` file belongs under `src/`.
+- Public headers must not include or otherwise depend on private headers.
+- Keep implementation-specific classes and third-party implementation details out of the public interface unless they are intentionally part of the supported API.
+- CMake targets must expose only the public include interface to consumers; configure internal include access privately where the project layout permits it.
+- Use public include paths such as `<self/core/Renderer.hpp>` and internal include paths such as `<internal/core/FontRenderer.hpp>`. Do not use relative paths to reach headers.
+- New files and future refactoring must follow these conventions. When an existing instruction conflicts with this section, preserve the public/private boundary described here.
+
+## 7. Change discipline
 
 For non-trivial tasks:
 
@@ -73,7 +86,7 @@ Do not perform broad rewrites, mass renames, or speculative redesigns unless exp
 
 Do not commit, push, publish, or create a pull request unless explicitly asked.
 
-## 7. Working with the architecture documents
+## 8. Working with the architecture documents
 
 - Treat `REQUIREMENTS.md` as the product-level source of truth for intended capabilities.
 - Treat `ARCHITECTURE.md` as the current architectural direction, not as permission to implement every future phase immediately.
@@ -81,6 +94,6 @@ Do not commit, push, publish, or create a pull request unless explicitly asked.
 - Keep documentation synchronized when a deliberate architectural decision changes.
 - Do not claim a requirement is complete merely because a corresponding class or header exists. Verify actual behavior.
 
-## 8. Default response style
+## 9. Default response style
 
 When discussing work with the maintainer, be concise and technically precise. Distinguish facts observed in the repository from recommendations and assumptions. Prefer concrete file paths, dependency relationships, and build/test evidence over vague architectural language.

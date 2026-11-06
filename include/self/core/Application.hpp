@@ -9,17 +9,21 @@
 #pragma once
 
 #include <expected>
+#include <filesystem>
+#include <vector>
 
 #include <self/core/Window.hpp>
 #include <self/core/Renderer.hpp>
 #include <self/core/Style.hpp>
+#include <self/modules/ModuleManager.hpp>
 #include <self/parts/RootPart.hpp>
 
 class Application
 {
 public:
     static std::expected<Application, WindowError>
-    Create(const char* title, Style style);
+    Create(const char* title, Style style,
+           std::vector<std::filesystem::path> module_directories = {"modules"});
 
     ~Application() = default;
 
@@ -29,14 +33,18 @@ public:
     Application(Application&&) noexcept = default;
     Application& operator=(Application&&) noexcept = default;
 
+    [[nodiscard]] const Broise::ModuleManager& GetModuleManager() const noexcept;
     void Run();
 
 private:
-    explicit Application(Window window, Style style);
+    explicit Application(Window window, Style style,
+                         std::vector<std::filesystem::path> module_directories);
 
     Window window_;
     Renderer render_;
     Style style_;
+    Broise::ModuleManager module_manager_;
+    std::vector<std::filesystem::path> module_directories_;
     RootPart root_;
 
 };

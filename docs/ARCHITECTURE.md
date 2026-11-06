@@ -26,7 +26,7 @@ A page is a workspace composition surface. It may contain several widgets from o
 - A **Part** is a Runtime-provided UI building block, such as a container, button, text element, or image. Parts compose into Part Trees; the Runtime provides their management, composition, update, and render infrastructure.
 - **RootPart** is the conceptual root of a Part Tree. It is not a software-level Widget, and whether it needs a distinct concrete class remains open.
 - A **Widget** is an application- or feature-provided functional software component. It may use multiple Parts to build its UI, but it is not a Part or a Part Tree node.
-- The Runtime provides Parts and remains independent of application-specific Widgets. The software-level Widget interface, lifecycle, manager, and ownership system have not been implemented and should not be designed prematurely. Workspace and Page architecture remain future design work.
+- The Runtime provides Parts and remains independent of application-specific Widgets. Public C++ `Broise::IWidget` and `Broise::IModule` interfaces and an initial `ModuleManager` now exist. Modules expose metadata and Widget descriptors, provide Widget factories, and use the C++-linkage `CreateModuleV1` entry point. The manager discovers and initializes Modules; Widget-instance tracking, Workspace/Page hosting, and safe live-instance unload remain future work.
 - The historical source snapshot used `IWidget` and `MainWidget` for the UI-level Part concept. The current source is being aligned to `IPart` and `RootPart` terminology.
 
 ## 2. Observed repository snapshot
@@ -226,7 +226,7 @@ The Page/Workspace manager should:
 
 A page may contain widgets supplied by different feature modules. For example, the same page may contain a Proof Checker editor and an Email status panel. The Runtime only knows their common widget interfaces; it does not link to either module.
 
-Start with normal in-process C++ construction/registration. Do not implement dynamic library loading, a binary plugin ABI, a cross-language C ABI, or a package system as a prerequisite for pages. If plugin support later becomes necessary, define its lifecycle and compatibility requirements separately.
+Pages should not own Module discovery or loading. The Runtime discovers native C++ Modules separately; the current Module Manager is not yet connected to Page/Workspace Widget placement. Do not add a C-linkage or cross-toolchain Module ABI.
 
 ### 4.6 Input and event dispatch
 
@@ -378,11 +378,11 @@ Implement each stage as a small reviewable change. Do not attempt a full rewrite
 
 The following choices need a deliberate decision when their implementation becomes relevant:
 
-- Exact `IWidget`/`Widget` lifecycle signatures and whether rendering receives `Renderer&` or a small context object.
+- How the minimal `IWidget` API integrates with Part-tree update/render traversal and what additional lifecycle hooks a concrete use case requires.
 - Concrete ownership container for heterogeneous child widgets.
 - Whether widget layout uses only logical pixels or supports a documented mix of absolute and normalized coordinates.
 - Whether page-level layout is freeform, grid-based, or initially a simple container tree.
-- Whether widgets from separate feature modules are statically linked or dynamically loaded. Static/in-process C++ composition is the recommended first step.
+- The initial design uses dynamic native C++ Modules and a compiler-specific decorated entry-point name. The supported compiler/standard-library ABI matrix and distribution tooling must be finalized before independent Modules are released.
 - Whether the first version supports one window or multiple windows.
 - Whether window-level transparency/backdrop blur is required, optional, or platform-specific.
 

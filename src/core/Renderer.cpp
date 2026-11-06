@@ -14,7 +14,7 @@
 
 #include <self/core/Renderer.hpp>
 
-#include "FontRenderer.hpp"
+#include <internal/core/FontRenderer.hpp>
 
 Renderer::Renderer() = default;
 

@@ -8,11 +8,26 @@
 
 #pragma once
 
+class Renderer;
+struct Style;
+
+struct PartRenderContext
+{
+    Renderer& renderer;
+    const Style& style;
+    float logical_width;
+    float logical_height;
+    float framebuffer_width;
+    float framebuffer_height;
+    float title_bar_height;
+    float title_bar_control_width;
+};
+
 class IPart
 {
 public:
     virtual ~IPart() = default;
 
-    virtual void Render() = 0;
+    virtual void Render(const PartRenderContext& context) = 0;
     virtual void Update() = 0;
 };

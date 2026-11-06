@@ -8,7 +8,7 @@
 
 #include <glad/gl.h>
 
-#include "FontRenderer.hpp"
+#include <internal/core/FontRenderer.hpp>
 
 namespace
 {
