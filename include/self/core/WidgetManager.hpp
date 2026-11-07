@@ -12,6 +12,7 @@
 #include <vector>
 
 #include <self/modules/IWidgetEntry.hpp>
+#include <self/ui/Layout.hpp>
 
 
 class WidgetManager
@@ -28,6 +29,7 @@ public:
     void Destroy(IWidget& widget) noexcept;
 
 private:
+    Layout layout_;
     struct WidgetRecord
     {
         IWidgetEntry* entry;

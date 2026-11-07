@@ -12,16 +12,33 @@
 #include <vector>
 #include <glad/gl.h>
 
-#include <../../include/self/core/Renderer.hpp>
+#include <self/core/Renderer.hpp>
 #include <self/ui/Font.hpp>
 
-Renderer::Renderer() = default;
+Renderer::Renderer(Window window, Style style)
+    : window_(std::move(window))
+    , style_(std::move(style))
+{}
+
+std::expected<Renderer, WindowError> Renderer::Create(
+    const char* title, Style style)
+{
+    auto window = Window::Create(title);
+    if (!window) {
+        return std::unexpected(window.error());
+    }
+
+    Renderer renderer(std::move(*window), std::move(style));
+    renderer.Init();
+    return renderer;
+}
 
 Renderer::Renderer(Renderer&& other) noexcept
-    : program_(std::exchange(other.program_, 0)),
+    : window_(std::move(other.window_)),
+      style_(std::move(other.style_)),
+      program_(std::exchange(other.program_, 0)),
       vao_(std::exchange(other.vao_, 0)),
-      vbo_(std::exchange(other.vbo_, 0)),
-      font_renderer_(std::move(other.font_renderer_))
+      vbo_(std::exchange(other.vbo_, 0))
 {}
 
 Renderer& Renderer::operator=(Renderer&& other) noexcept
@@ -29,6 +46,9 @@ Renderer& Renderer::operator=(Renderer&& other) noexcept
     if (this == &other) {
         return *this;
     }
+
+    window_ = std::move(other.window_);
+    style_ = std::move(other.style_);
 
     if (vbo_ != 0) {
         glDeleteBuffers(1, &vbo_);
@@ -45,7 +65,6 @@ Renderer& Renderer::operator=(Renderer&& other) noexcept
     program_ = std::exchange(other.program_, 0);
     vao_ = std::exchange(other.vao_, 0);
     vbo_ = std::exchange(other.vbo_, 0);
-    font_renderer_ = std::move(other.font_renderer_);
 
     return *this;
 }
@@ -213,15 +232,4 @@ void Renderer::RenderPolygon(const PointSet& points, const Color& color) const
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
     glUseProgram(0);
-}
-
-void Renderer::RenderText(
-    const std::string_view text, const FontStyle& font,
-    const float x, const float y, const float width, const float height,
-    const Color& color)
-{
-    if (!font_renderer_) {
-        font_renderer_ = std::make_unique<FontRenderer>();
-    }
-    font_renderer_->Render(text, font, x, y, width, height, color);
 }

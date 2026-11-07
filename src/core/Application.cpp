@@ -124,15 +124,3 @@ void Application::Run()
         window_.SwapBuffers();
     }
 }
-
-/***
-Widget& Application::GetRoot()
-{
-    return root_;
-}
-
-Widget* Application::GetPressedWidget(const Point& point)
-{
-    return root_.GetPressedWidget(point);
-}
-***/

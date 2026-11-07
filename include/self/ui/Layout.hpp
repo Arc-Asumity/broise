@@ -3,19 +3,11 @@
 // Licensed under the GPLv3 or later.
 // https://github.com/Arc-Asumity/broise
 // ==============================================================
-// Path /src/parts/RootPart.cpp
-// Root Part.
+// Path /include/self/ui/Layout.hpp
+// Layout owned by the Widget manager.
 
+#pragma once
 
-#include <self/parts/RootPart.hpp>
-
-RootPart::RootPart() = default;
-
-void RootPart::Render(const PartRenderContext& context)
+class Layout
 {
-    title_bar_.Render(context);
-}
-
-void RootPart::Update()
-{
-}
+};

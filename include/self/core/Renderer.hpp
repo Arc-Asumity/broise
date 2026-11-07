@@ -9,14 +9,19 @@
 
 #pragma once
 
+#include <expected>
+
 #include <self/ui/Window.hpp>
 #include <self/ui/Base.hpp>
+#include <self/ui/Style.hpp>
 
 
 class Renderer
 {
 public:
-    Renderer();
+    [[nodiscard]] static std::expected<Renderer, WindowError>
+    Create(const char* title, Style style);
+
     ~Renderer();
 
     Renderer(const Renderer&) = delete;
@@ -31,8 +36,11 @@ public:
 private:
 
     Window window_;
+    Style style_;
 
     unsigned int program_{};
     unsigned int vao_{};
     unsigned int vbo_{};
+
+    Renderer(Window window, Style style);
 };
