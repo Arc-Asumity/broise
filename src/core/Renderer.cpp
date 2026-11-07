@@ -233,3 +233,28 @@ void Renderer::RenderPolygon(const PointSet& points, const Color& color) const
     glBindVertexArray(0);
     glUseProgram(0);
 }
+
+bool Renderer::ShouldClose() const
+{
+    return window_.ShouldClose();
+}
+
+void Renderer::PollEvents() const
+{
+    Window::PollEvents();
+}
+
+void Renderer::UpdateWindowInput()
+{
+    window_.UpdateTitleBarInput();
+}
+
+void Renderer::SwapBuffers() const
+{
+    window_.SwapBuffers();
+}
+
+const Window& Renderer::GetWindow() const noexcept
+{
+    return window_;
+}

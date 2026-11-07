@@ -32,6 +32,11 @@ public:
 
     void Init();
     void RenderPolygon(const PointSet& points, const Color& color) const;
+    [[nodiscard]] bool ShouldClose() const;
+    void PollEvents() const;
+    void UpdateWindowInput();
+    void SwapBuffers() const;
+    [[nodiscard]] const Window& GetWindow() const noexcept;
 
 private:
 

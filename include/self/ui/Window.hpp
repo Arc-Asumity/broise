@@ -10,10 +10,11 @@
 
 #include <expected>
 #define GLFW_INCLUDE_NONE
+
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 
-#include <../ui/Base.hpp>
+#include <self/ui/Base.hpp>
 
 constexpr float kScale = 2.0f / 3.0f;
 
@@ -22,6 +23,7 @@ enum class WindowError
     GlfwInitializationFailed,
     WindowCreationFailed,
     OpenGLLoaderInitializationFailed,
+    StyleConfigurationFailed,
 };
 
 class Window {

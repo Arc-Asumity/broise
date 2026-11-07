@@ -19,12 +19,14 @@ class Application
 {
 public:
     static std::expected<Application, WindowError>
-    Create(const char* title, std::filesystem::path root_directory);
+    Create(const char* title, const std::filesystem::path& installed_directory);
 
     ~Application() = default;
 
     Application(const Application&) = delete;
     Application& operator=(const Application&) = delete;
+    Application(Application&&) noexcept = default;
+    Application& operator=(Application&&) noexcept = default;
 
     [[nodiscard]] const ModuleLoader& GetModuleManager() const noexcept;
     [[nodiscard]] ModuleLoader& GetModuleManager() noexcept;
@@ -32,6 +34,8 @@ public:
     void Run();
 
 private:
+    Application(Renderer renderer, const std::filesystem::path& installed_directory);
+
     Renderer renderer_;
     ModuleLoader modules_;
     WidgetManager widgets_;

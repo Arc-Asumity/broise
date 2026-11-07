@@ -23,6 +23,8 @@ public:
     WidgetManager() = default;
     WidgetManager(const WidgetManager&) = delete;
     WidgetManager& operator=(const WidgetManager&) = delete;
+    WidgetManager(WidgetManager&&) noexcept = default;
+    WidgetManager& operator=(WidgetManager&&) noexcept = default;
 
     void Register(IWidgetEntry& entry);
     [[nodiscard]] IWidget* Create(std::string_view id);
