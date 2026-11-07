@@ -3,7 +3,7 @@
 // Licensed under the GPLv3 or later.
 // https://github.com/Arc-Asumity/broise
 // ==============================================================
-// Path /include/self/core/Base.hpp
+// Path /include/self/ui/Base.hpp
 // Basic definition for Broise.
 
 #pragma once

@@ -3,7 +3,7 @@
 // Licensed under the GPLv3 or later.
 // https://github.com/Arc-Asumity/broise
 // ==============================================================
-// Path /include/self/widgets/IWidget.hpp
+// Path /include/self/module/IWidget.hpp
 // Public interface for an application-provided software Widget.
 
 #pragma once
@@ -22,8 +22,6 @@ namespace Broise
         [[nodiscard]] virtual std::string_view GetName() const noexcept = 0;
         virtual void Update() = 0;
 
-        // Returns the root of this Widget's UI Part hierarchy. The Widget
-        // retains ownership of its Parts; the returned reference is non-owning.
         [[nodiscard]] virtual ::IPart& GetRootPart() noexcept = 0;
     };
 }

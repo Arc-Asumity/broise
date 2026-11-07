@@ -11,8 +11,8 @@
 #include <string>
 #include <string_view>
 
-#include <self/core/Rect.hpp>
-#include <self/core/Style.hpp>
+#include <../ui/Rect.hpp>
+#include <../ui/Style.hpp>
 #include <self/parts/IPart.hpp>
 
 class TextPart : public IPart

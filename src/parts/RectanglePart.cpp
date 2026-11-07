@@ -9,7 +9,7 @@
 #include <array>
 #include <cmath>
 
-#include <self/core/Renderer.hpp>
+#include <../../include/self/ui/Renderer.hpp>
 #include <self/parts/RectanglePart.hpp>
 
 void RectanglePart::SetBounds(const Rect bounds)

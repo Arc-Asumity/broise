@@ -3,7 +3,7 @@
 // Licensed under the GPLv3 or later.
 // https://github.com/Arc-Asumity/broise
 // ==============================================================
-// Path /src/core/Renderer.cpp
+// Path /src/ui/Renderer.cpp
 // Renderer the ui.
 
 
@@ -12,9 +12,8 @@
 #include <vector>
 #include <glad/gl.h>
 
-#include <self/core/Renderer.hpp>
-
-#include <internal/core/FontRenderer.hpp>
+#include <self/ui/Renderer.hpp>
+#include <self/ui/Font.hpp>
 
 Renderer::Renderer() = default;
 

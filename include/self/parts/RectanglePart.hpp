@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <self/core/Rect.hpp>
+#include <../ui/Rect.hpp>
 #include <self/parts/IPart.hpp>
 
 class RectanglePart : public IPart

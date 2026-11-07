@@ -1,3 +1,12 @@
+// ==============================================================
+// Copyright (c) 2026 Arc Asumity
+// Licensed under the GPLv3 or later.
+// https://github.com/Arc-Asumity/broise
+// ==============================================================
+// Path /src/ui/Font.cpp
+// Font renderer.
+
+
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -8,7 +17,7 @@
 
 #include <glad/gl.h>
 
-#include <internal/core/FontRenderer.hpp>
+#include <self/ui/Font.hpp>
 
 namespace
 {

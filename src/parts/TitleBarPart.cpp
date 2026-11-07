@@ -8,7 +8,7 @@
 
 #include <cmath>
 
-#include <self/core/Renderer.hpp>
+#include <../../include/self/ui/Renderer.hpp>
 #include <self/core/Style.hpp>
 #include <self/parts/TitleBarPart.hpp>
 

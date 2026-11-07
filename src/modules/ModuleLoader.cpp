@@ -3,7 +3,7 @@
 // Licensed under the GPLv3 or later.
 // https://github.com/Arc-Asumity/broise
 // ==============================================================
-// Path /src/modules/ModuleManager.cpp
+// Path /src/modules/ModuleLoader.cpp
 // Module discovery, validation, initialization, and shutdown.
 
 #include <algorithm>
@@ -18,7 +18,7 @@
 #include <vector>
 
 #include <internal/modules/DynamicLibrary.hpp>
-#include <self/modules/ModuleManager.hpp>
+#include <self/modules/ModuleLoader.hpp>
 
 namespace
 {
@@ -53,8 +53,6 @@ namespace
 
     std::vector<ModuleRecord>& PinnedModules()
     {
-        // A failed shutdown must keep the module object and its code resident
-        // until process exit. Intentionally do not destroy this registry.
         static auto* modules = new std::vector<ModuleRecord>();
         return *modules;
     }
@@ -82,7 +80,7 @@ namespace
 
 }
 
-class Broise::ModuleManager::Impl
+class Broise::ModuleLoader::Impl
 {
 public:
     ~Impl()
@@ -422,17 +420,17 @@ public:
     bool shutdown{};
 };
 
-Broise::ModuleManager::ModuleManager()
+Broise::ModuleLoader::ModuleLoader()
     : impl_(std::make_unique<Impl>())
 {}
 
-Broise::ModuleManager::~ModuleManager() = default;
+Broise::ModuleLoader::~ModuleLoader() = default;
 
-Broise::ModuleManager::ModuleManager(ModuleManager&&) noexcept = default;
+Broise::ModuleLoader::ModuleLoader(ModuleLoader&&) noexcept = default;
 
-Broise::ModuleManager& Broise::ModuleManager::operator=(ModuleManager&&) noexcept = default;
+Broise::ModuleLoader& Broise::ModuleLoader::operator=(ModuleLoader&&) noexcept = default;
 
-void Broise::ModuleManager::DiscoverAndLoad(
+void Broise::ModuleLoader::DiscoverAndLoad(
     const std::span<const std::filesystem::path> directories)
 {
     if (impl_) {
@@ -440,13 +438,13 @@ void Broise::ModuleManager::DiscoverAndLoad(
     }
 }
 
-Broise::IWidget* Broise::ModuleManager::CreateWidget(
+Broise::IWidget* Broise::ModuleLoader::CreateWidget(
     const std::string_view module_id, const std::string_view widget_id)
 {
     return impl_ ? impl_->CreateWidget(module_id, widget_id) : nullptr;
 }
 
-void Broise::ModuleManager::DestroyWidget(Broise::IWidget& widget) noexcept
+void Broise::ModuleLoader::DestroyWidget(Broise::IWidget& widget) noexcept
 {
     if (impl_) {
         impl_->DestroyWidget(widget);
@@ -454,7 +452,7 @@ void Broise::ModuleManager::DestroyWidget(Broise::IWidget& widget) noexcept
 }
 
 std::span<const Broise::LoadedModuleInfo>
-Broise::ModuleManager::GetLoadedModules() const noexcept
+Broise::ModuleLoader::GetLoadedModules() const noexcept
 {
     if (!impl_) {
         return {};
@@ -463,7 +461,7 @@ Broise::ModuleManager::GetLoadedModules() const noexcept
 }
 
 std::span<const Broise::ModuleDiagnostic>
-Broise::ModuleManager::GetDiagnostics() const noexcept
+Broise::ModuleLoader::GetDiagnostics() const noexcept
 {
     if (!impl_) {
         return {};
@@ -471,7 +469,7 @@ Broise::ModuleManager::GetDiagnostics() const noexcept
     return impl_->diagnostics;
 }
 
-void Broise::ModuleManager::Shutdown() noexcept
+void Broise::ModuleLoader::Shutdown() noexcept
 {
     if (impl_) {
         impl_->Shutdown();

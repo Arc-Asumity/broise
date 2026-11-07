@@ -3,7 +3,7 @@
 // Licensed under the GPLv3 or later.
 // https://github.com/Arc-Asumity/broise
 // ==============================================================
-// Path /include/self/modules/ModuleManager.hpp
+// Path /include/self/modules/ModuleLoader.hpp
 // Runtime API for discovering and managing native C++ Modules.
 
 #pragma once
@@ -59,26 +59,22 @@ namespace Broise
         std::vector<LoadedWidgetInfo> widgets;
     };
 
-    class ModuleManager
+    class ModuleLoader
     {
     public:
-        ModuleManager();
-        ~ModuleManager();
+        ModuleLoader();
+        ~ModuleLoader();
 
-        ModuleManager(const ModuleManager&) = delete;
-        ModuleManager& operator=(const ModuleManager&) = delete;
+        ModuleLoader(const ModuleLoader&) = delete;
+        ModuleLoader& operator=(const ModuleLoader&) = delete;
 
-        ModuleManager(ModuleManager&&) noexcept;
-        ModuleManager& operator=(ModuleManager&&) noexcept;
+        ModuleLoader(ModuleLoader&&) noexcept;
+        ModuleLoader& operator=(ModuleLoader&&) noexcept;
 
-        // Scans configured directories recursively. A failed candidate is
-        // recorded and does not prevent other candidates from loading.
         void DiscoverAndLoad(std::span<const std::filesystem::path> directories);
 
-        // Returns a non-owning pointer. The ModuleManager owns the instance
-        // and destroys it before shutting down its providing Module.
-        [[nodiscard]] IWidget* CreateWidget(std::string_view module_id,
-                                            std::string_view widget_id);
+        [[nodiscard]] IWidget*
+        CreateWidget(std::string_view module_id, std::string_view widget_id);
         void DestroyWidget(IWidget& widget) noexcept;
 
         [[nodiscard]] std::span<const LoadedModuleInfo>
@@ -86,8 +82,6 @@ namespace Broise
         [[nodiscard]] std::span<const ModuleDiagnostic>
         GetDiagnostics() const noexcept;
 
-        // Shuts down Modules and unloads those that report a successful
-        // shutdown. Unsafe-to-unload Modules remain pinned for process life.
         void Shutdown() noexcept;
 
     private:

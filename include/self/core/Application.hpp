@@ -14,18 +14,17 @@
 #include <vector>
 
 #include <self/core/Window.hpp>
-#include <self/core/Renderer.hpp>
-#include <self/core/Style.hpp>
-#include <self/modules/ModuleManager.hpp>
+#include <self/ui/Renderer.hpp>
+#include <self/ui/Style.hpp>
+#include <self/modules/ModuleLoader.hpp>
 #include <self/parts/RootPart.hpp>
-#include <self/widgets/IWidget.hpp>
+#include <self/modules/IWidget.hpp>
 
 class Application
 {
 public:
     static std::expected<Application, WindowError>
-    Create(const char* title, Style style,
-           std::vector<std::filesystem::path> module_directories = {"modules"});
+    Create(const char* title, Style style, std::filesystem::path module_directory);
 
     ~Application() = default;
 
@@ -35,8 +34,8 @@ public:
     Application(Application&&) noexcept = default;
     Application& operator=(Application&&) noexcept = default;
 
-    [[nodiscard]] const Broise::ModuleManager& GetModuleManager() const noexcept;
-    [[nodiscard]] Broise::ModuleManager& GetModuleManager() noexcept;
+    [[nodiscard]] const Broise::ModuleLoader& GetModuleManager() const noexcept;
+    [[nodiscard]] Broise::ModuleLoader& GetModuleManager() noexcept;
 
     [[nodiscard]] Broise::IWidget*
     AddWidget(std::string_view module_id, std::string_view widget_id);
@@ -49,14 +48,13 @@ private:
     explicit Application(
         Window window,
         Style style,
-        std::vector<std::filesystem::path> module_directories
+        std::filesystem::path module_directory
     );
 
     Window window_;
     Renderer render_;
     Style style_;
-    Broise::ModuleManager module_manager_;
-    std::vector<std::filesystem::path> module_directories_;
+    Broise::ModuleLoader module_manager_;
     RootPart root_;
     std::vector<Broise::IWidget*> widgets_;
 

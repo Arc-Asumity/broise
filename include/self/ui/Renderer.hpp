@@ -3,16 +3,17 @@
 // Licensed under the GPLv3 or later.
 // https://github.com/Arc-Asumity/broise
 // ==============================================================
-// Path /include/self/core/Renderer.hpp
+// Path /include/self/ui/Renderer.hpp
 // Header file for render of UI.
+
 
 #pragma once
 
 #include <memory>
 #include <string_view>
 
-#include <self/core/Base.hpp>
-#include <self/core/Style.hpp>
+#include <self/ui/Base.hpp>
+#include <self/ui/Style.hpp>
 
 class FontRenderer;
 

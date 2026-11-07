@@ -22,13 +22,8 @@ int main(const int argc, char* argv[])
         return 1;
     }
 
-#ifndef BROISE_MODULE_DIRECTORY
-#error "The DefaultModule directory must be provided by the CMake target"
-#endif
-
     auto application = Application::Create(
-        "Broise", std::move(*style),
-        {std::filesystem::path{BROISE_MODULE_DIRECTORY}});
+        "Broise", std::move(*style));
     if (!application) {
         std::cerr << "Failed to create application (error code "
                   << static_cast<int>(application.error()) << ").\n";

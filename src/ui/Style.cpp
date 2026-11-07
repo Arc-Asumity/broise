@@ -3,14 +3,15 @@
 // Licensed under the GPLv3 or later.
 // https://github.com/Arc-Asumity/broise
 // ==============================================================
-// Path /src/core/Style.cpp
+// Path /src/ui/Style.cpp
 // Style configuration parser.
+
 
 #include <array>
 #include <string>
 #include <toml++/toml.hpp>
 
-#include <self/core/Style.hpp>
+#include <self/ui/Style.hpp>
 
 namespace
 {

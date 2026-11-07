@@ -3,13 +3,13 @@
 // Licensed under the GPLv3 or later.
 // https://github.com/Arc-Asumity/broise
 // ==============================================================
-// Path /src/core/Rect.cpp
+// Path /src/ui/Rect.cpp
 // Function for rect.
 
 
 #include <numeric>
 
-#include <self/core/Rect.hpp>
+#include <self/ui/Rect.hpp>
 
 std::vector<Rect> Rect::SplitXs(const std::vector<float>& xs) const
 {

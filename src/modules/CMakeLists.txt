@@ -8,7 +8,7 @@ target_compile_features(Broise_ModuleAPI INTERFACE cxx_std_23)
 
 add_library(Broise_ModuleManager STATIC
     DynamicLibrary.cpp
-    ModuleManager.cpp
+        ModuleLoader.cpp
 )
 set_target_properties(Broise_ModuleManager PROPERTIES POSITION_INDEPENDENT_CODE ON)
 add_library(Broise::ModuleManager ALIAS Broise_ModuleManager)

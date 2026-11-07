@@ -13,7 +13,7 @@
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 
-#include <self/core/Base.hpp>
+#include <../ui/Base.hpp>
 
 constexpr float kScale = 2.0f / 3.0f;
 

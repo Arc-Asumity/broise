@@ -16,8 +16,10 @@
 #include <self/core/Application.hpp>
 
 std::expected<Application, WindowError>
-Application::Create(const char* title, Style style,
-                    std::vector<std::filesystem::path> module_directories)
+Application::Create(
+    const char* title,
+    Style style,
+    std::filesystem::path module_directory)
 {
     auto window = Window::Create(title);
 
@@ -28,31 +30,31 @@ Application::Create(const char* title, Style style,
     Application application{
         std::move(*window),
         std::move(style),
-        std::move(module_directories),
+        std::move(module_directory),
     };
     application.module_manager_.DiscoverAndLoad(
-        application.module_directories_);
+        application.module_directory_);
     return std::move(application);
 }
 
 Application::Application(
     Window window, Style style,
-    std::vector<std::filesystem::path> module_directories)
+    std::vector<std::filesystem::path> module_directory)
     : window_(std::move(window))
     , render_(Renderer())
     , style_(std::move(style))
-    , module_directories_(std::move(module_directories))
+    , module_directory_(std::move(module_directory))
     , root_()
 {
     render_.Init();
 }
 
-const Broise::ModuleManager& Application::GetModuleManager() const noexcept
+const Broise::ModuleLoader& Application::GetModuleManager() const noexcept
 {
     return module_manager_;
 }
 
-Broise::ModuleManager& Application::GetModuleManager() noexcept
+Broise::ModuleLoader& Application::GetModuleManager() noexcept
 {
     return module_manager_;
 }

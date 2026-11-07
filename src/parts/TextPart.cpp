@@ -8,7 +8,7 @@
 
 #include <utility>
 
-#include <self/core/Renderer.hpp>
+#include <../../include/self/ui/Renderer.hpp>
 #include <self/parts/TextPart.hpp>
 
 void TextPart::SetText(const std::string_view text)

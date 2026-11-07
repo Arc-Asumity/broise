@@ -9,7 +9,7 @@
 
 #include <string_view>
 
-#include <self/widgets/IWidget.hpp>
+#include <IWidget.hpp>
 
 namespace Broise
 {

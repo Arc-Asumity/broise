@@ -1,3 +1,12 @@
+// ==============================================================
+// Copyright (c) 2026 Arc Asumity
+// Licensed under the GPLv3 or later.
+// https://github.com/Arc-Asumity/broise
+// ==============================================================
+// Path /include/self/ui/Font.hpp
+// Header file for font renderer.
+
+
 #pragma once
 
 #include <string>
@@ -7,8 +16,8 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#include <self/core/Base.hpp>
-#include <self/core/Style.hpp>
+#include <self/ui/Base.hpp>
+#include <self/ui/Style.hpp>
 
 class FontRenderer
 {

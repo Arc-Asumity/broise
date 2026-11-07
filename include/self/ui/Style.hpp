@@ -3,7 +3,9 @@
 // Licensed under the GPLv3 or later.
 // https://github.com/Arc-Asumity/broise
 // ==============================================================
+// Path /include/self/ui/Style.hpp
 // Style values loaded from a TOML configuration file.
+
 
 #pragma once
 
@@ -12,7 +14,7 @@
 #include <string>
 #include <unordered_map>
 
-#include <self/core/Base.hpp>
+#include <self/ui/Base.hpp>
 
 struct FontStyle
 {

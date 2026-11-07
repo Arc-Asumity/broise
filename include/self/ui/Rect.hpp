@@ -3,18 +3,18 @@
 // Licensed under the GPLv3 or later.
 // https://github.com/Arc-Asumity/broise
 // ==============================================================
-// Path /include/self/core/Rect.hpp
+// Path /include/self/ui/Rect.hpp
 // Header for rect.
+
 
 #pragma once
 
 #include <array>
-#include <cstddef>
 #include <ostream>
 #include <utility>
 #include <vector>
 
-#include <self/core/Base.hpp>
+#include <self/ui/Base.hpp>
 
 struct Rect
 {
