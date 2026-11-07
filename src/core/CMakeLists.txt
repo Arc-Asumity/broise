@@ -1,10 +1,8 @@
 add_library(Broise_Runtime SHARED
     Application.cpp
+    ModuleLoader.cpp
+    WidgetManager.cpp
     Window.cpp
-    Rect.cpp
-    Renderer.cpp
-    Style.cpp
-    FontRenderer.cpp
 )
 add_library(Broise::Runtime ALIAS Broise_Runtime)
 get_filename_component(BROISE_RUNTIME_OUTPUT_DIRECTORY
@@ -23,7 +21,7 @@ target_link_libraries(Broise_Runtime
         Broise::ModuleAPI
     PRIVATE
         Broise::Parts
-        Broise::ModuleManager
-        tomlplusplus::tomlplusplus
+        Broise::ModuleSupport
+        Broise::UI
         freetype
 )

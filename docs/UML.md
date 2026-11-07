@@ -4,50 +4,50 @@ title: Main Architecture
 ---
 classDiagram
 class Application {
-- ModuleLoader loader_
-- WidgetManager manager_
-- Renderer renderer_
-+ Create() Application
-+ Shutdown()
+    - ModuleLoader loader_
+    - WidgetManager manager_
+    - Renderer renderer_
+    + Create() Application
+    + Shutdown()
 }
 
 class Renderer {
-- Window window_
-- Style style_
+    - Window window_
+    - Style style_
 }
 
 class Window
 class Style
 
 class ModuleLoader {
-- vector~IModule~ modules_
-+ Load(path: string)
-+ Unload(module: IModule)
+    - vector~IModule~ modules_
+    + Load(path: string)
+    + Unload(module: IModule)
 }
 
 class WidgetManager {
-- Layout layout_
-- vector~IWidgetEntry~ entries_
-- vector~IWidget~ widgets_
-+ Register(entry: IWidgetEntry)
-+ Create(id: string) IWidget
-+ Destroy(widget: IWidget)
+    - Layout layout_
+    - vector~IWidgetEntry~ entries_
+    - vector~IWidget~ widgets_
+    + Register(entry: IWidgetEntry)
+    + Create(id: string) IWidget
+    + Destroy(widget: IWidget)
 }
 
 class Layout
 
 class IModule {
-+ GetWidgetEntries() vector~IWidgetEntry~
+    + GetWidgetEntries() vector~IWidgetEntry~
 }
 
 class IWidgetEntry {
-+ GetId() string
-+ Create() IWidget
-+ Destroy(widget: IWidget)
-    }
+    + GetId() string
+    + Create() IWidget
+    + Destroy(widget: IWidget)
+}
 
 class IWidget {
-+ Update()
+    + Update()
 }
 
 Application *-- ModuleLoader : owns

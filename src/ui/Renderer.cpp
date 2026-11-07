@@ -12,7 +12,7 @@
 #include <vector>
 #include <glad/gl.h>
 
-#include <self/ui/Renderer.hpp>
+#include <../../include/self/core/Renderer.hpp>
 #include <self/ui/Font.hpp>
 
 Renderer::Renderer() = default;

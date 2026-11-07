@@ -11,7 +11,7 @@
 #include <glad/gl.h>
 #include <utility>
 
-#include <self/core/Window.hpp>
+#include <../../include/self/ui/Window.hpp>
 
 std::expected<Window, WindowError>
 Window::Create(const char* title)

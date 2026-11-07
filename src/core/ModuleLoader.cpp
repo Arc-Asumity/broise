@@ -18,7 +18,7 @@
 #include <vector>
 
 #include <internal/modules/DynamicLibrary.hpp>
-#include <self/modules/ModuleLoader.hpp>
+#include <self/core/ModuleLoader.hpp>
 
 namespace
 {

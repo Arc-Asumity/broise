@@ -12,16 +12,10 @@
 
 #include <self/parts/IPart.hpp>
 
-namespace Broise
+class IWidget
 {
-    class IWidget
-    {
-    public:
-        virtual ~IWidget() = default;
+public:
+    virtual ~IWidget() = default;
 
-        [[nodiscard]] virtual std::string_view GetName() const noexcept = 0;
-        virtual void Update() = 0;
-
-        [[nodiscard]] virtual ::IPart& GetRootPart() noexcept = 0;
-    };
-}
+    virtual void Update() = 0;
+};

@@ -1,4 +1,5 @@
 add_executable(Broise Main.cpp)
+target_compile_features(Broise PRIVATE cxx_std_23)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
     if (CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")

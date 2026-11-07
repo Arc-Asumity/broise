@@ -3,19 +3,15 @@
 // Licensed under the GPLv3 or later.
 // https://github.com/Arc-Asumity/broise
 // ==============================================================
-// Path /include/self/ui/Renderer.hpp
+// Path /include/self/core/Renderer.hpp
 // Header file for render of UI.
 
 
 #pragma once
 
-#include <memory>
-#include <string_view>
-
+#include <self/ui/Window.hpp>
 #include <self/ui/Base.hpp>
-#include <self/ui/Style.hpp>
 
-class FontRenderer;
 
 class Renderer
 {
@@ -31,13 +27,12 @@ public:
 
     void Init();
     void RenderPolygon(const PointSet& points, const Color& color) const;
-    void RenderText(std::string_view text, const FontStyle& font,
-                    float x, float y, float width, float height,
-                    const Color& color);
 
 private:
+
+    Window window_;
+
     unsigned int program_{};
     unsigned int vao_{};
     unsigned int vbo_{};
-    std::unique_ptr<FontRenderer> font_renderer_;
 };
