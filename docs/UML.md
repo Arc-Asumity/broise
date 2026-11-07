@@ -3,47 +3,66 @@
 title: Main Architecture
 ---
 classDiagram
-    class Application {
-        - ModuleLoader loader_
-        - WidgetManager manager_
-        - Window window_
-        + Create() Application
-        + Shutdown()
+class Application {
+- ModuleLoader loader_
+- WidgetManager manager_
+- Renderer renderer_
++ Create() Application
++ Shutdown()
+}
+
+class Renderer {
+- Window window_
+- Style style_
+}
+
+class Window
+class Style
+
+class ModuleLoader {
+- vector~IModule~ modules_
++ Load(path: string)
++ Unload(module: IModule)
+}
+
+class WidgetManager {
+- Layout layout_
+- vector~IWidgetEntry~ entries_
+- vector~IWidget~ widgets_
++ Register(entry: IWidgetEntry)
++ Create(id: string) IWidget
++ Destroy(widget: IWidget)
+}
+
+class Layout
+
+class IModule {
++ GetWidgetEntries() vector~IWidgetEntry~
+}
+
+class IWidgetEntry {
++ GetId() string
++ Create() IWidget
++ Destroy(widget: IWidget)
     }
 
-    class Window
+class IWidget {
++ Update()
+}
 
-    class ModuleLoader {
-        - vector~IModule~ modules_
-        + Load(path: string)
-        + Unload(module: IModule)
-    }
+Application *-- ModuleLoader : owns
+Application *-- WidgetManager : owns
+Application *-- Renderer : owns
 
-    class WidgetManager {
-        - vector~IWidgetEntry~ entries_
-        + Register(entry: IWidgetEntry)
-        + Create(id: string) IWidget
-    }
+Renderer *-- Window : owns
+Renderer *-- Style : owns
 
-    class IModule {
-        + GetWidgetEntries() vector~IWidgetEntry~
-    }
+WidgetManager *-- Layout : owns
+WidgetManager o-- IWidgetEntry : registers
+WidgetManager *-- IWidget : owns
 
-    class IWidgetEntry {
-        + GetId() string
-        + Create() IWidget
-        + Destroy(widget: IWidget)
-    }
+ModuleLoader *-- IModule : owns
+IModule ..> IWidgetEntry : provides
 
-    class IWidget
-
-    Application *-- ModuleLoader
-    Application *-- WidgetManager
-    Application *-- Window
-
-    ModuleLoader *-- IModule
-    IModule ..> IWidgetEntry : provides
-    WidgetManager o-- IWidgetEntry : registers
-    IWidgetEntry ..> IWidget : creates
-    WidgetManager o-- IWidget : manages
+IWidgetEntry ..> IWidget : creates
 ```
