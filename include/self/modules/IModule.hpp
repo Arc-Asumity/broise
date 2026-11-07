@@ -6,20 +6,32 @@
 // Path /include/self/modules/IModule.hpp
 // Public interface for an application or feature Module.
 
+
 #pragma once
 
+#include <span>
+
+#include <self/modules/Preprocess.hpp>
 #include <self/modules/IWidgetEntry.hpp>
 
-
-class IModule
+namespace Broise
 {
-public:
-    virtual ~IModule() = default;
+    class IModule
+    {
+    public:
+        virtual ~IModule() = default;
 
-    [[nodiscard]] virtual std::vector<IWidgetEntry*>
-    GetWidgetEntries() noexcept = 0;
+        [[nodiscard]] virtual std::span<IWidgetEntry* const>
+        GetEntries() const noexcept = 0;
 
-    virtual bool Initialize() = 0;
+        virtual bool Initialize() = 0;
 
-    virtual bool Shutdown() noexcept = 0;
-};
+        virtual bool Shutdown() noexcept = 0;
+    };
+
+    BROISE_MODULE_EXPORT
+    IModule* CreateModule() noexcept;
+
+    BROISE_MODULE_EXPORT
+    void DestroyModule(const IModule* module) noexcept;
+}

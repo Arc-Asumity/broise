@@ -20,8 +20,5 @@ target_link_libraries(Broise_Runtime
         Broise::OpenGL
         Broise::ModuleAPI
     PRIVATE
-        Broise::Parts
-        Broise::ModuleSupport
         Broise::UI
-        freetype
 )

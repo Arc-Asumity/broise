@@ -26,18 +26,18 @@ public:
     WidgetManager(WidgetManager&&) noexcept = default;
     WidgetManager& operator=(WidgetManager&&) noexcept = default;
 
-    void Register(IWidgetEntry& entry);
-    [[nodiscard]] IWidget* Create(std::string_view id);
-    void Destroy(IWidget& widget) noexcept;
+    void Register(Broise::IWidgetEntry& entry);
+    [[nodiscard]] Broise::IWidget* Create(std::string_view id);
+    void Destroy(Broise::IWidget& widget) noexcept;
 
 private:
     Layout layout_;
     struct WidgetRecord
     {
-        IWidgetEntry* entry;
-        IWidget* widget;
+        Broise::IWidgetEntry* entry;
+        Broise::IWidget* widget;
     };
 
-    std::vector<IWidgetEntry*> entries_;
+    std::vector<Broise::IWidgetEntry*> entries_;
     std::vector<WidgetRecord> widgets_;
 };

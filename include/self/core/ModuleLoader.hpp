@@ -26,7 +26,7 @@ public:
     ModuleLoader& operator=(ModuleLoader&&) noexcept;
 
 private:
-    std::vector<IModule*> modules_;
+    std::vector<Broise::IModule*> modules_;
 
 };
 

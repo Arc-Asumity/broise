@@ -12,10 +12,13 @@
 
 #include <self/parts/IPart.hpp>
 
-class IWidget
+namespace Broise
 {
-public:
-    virtual ~IWidget() = default;
+    class IWidget
+    {
+    public:
+        virtual ~IWidget() = default;
 
-    virtual void Update() = 0;
-};
+        virtual void Update() = 0;
+    };
+}

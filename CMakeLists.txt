@@ -15,3 +15,4 @@ set(PROJECT_DESCRIPTION "A Software Runtime")
 include(cmake/Deps.cmake)
 
 add_subdirectory(src)
+add_subdirectory(example)
