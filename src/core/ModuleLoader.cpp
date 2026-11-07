@@ -7,8 +7,9 @@
 // Loads native C++ modules from the installed mods directory.
 
 #include <algorithm>
+#include <cstddef>
 #include <filesystem>
-#include <string>
+#include <string_view>
 #include <system_error>
 #include <utility>
 #include <vector>
@@ -26,19 +27,6 @@ namespace
     using CreateModuleFunction = Broise::IModule* (*)() noexcept;
     using DestroyModuleFunction = void (*)(const Broise::IModule*) noexcept;
 
-#if defined(_MSC_VER) && defined(_M_X64)
-    constexpr char kCreateModuleSymbol[] =
-        "?CreateModule@Broise@@YAPEAVIModule@1@XZ";
-    constexpr char kDestroyModuleSymbol[] =
-        "?DestroyModule@Broise@@YAXPEBVIModule@1@@Z";
-#elif defined(__GNUC__) || defined(__clang__)
-    constexpr char kCreateModuleSymbol[] = "_ZN6Broise12CreateModuleEv";
-    constexpr char kDestroyModuleSymbol[] =
-        "_ZN6Broise12DestroyModuleEPKNS_7IModuleE";
-#else
-#error "Module factory symbols are not defined for this compiler ABI"
-#endif
-
     void* OpenLibrary(const std::filesystem::path& path)
     {
 #ifdef _WIN32
@@ -48,13 +36,45 @@ namespace
 #endif
     }
 
-    void* FindSymbol(void* library, const char* name)
+    void* FindExport(void* library, const std::string_view function_name)
     {
 #ifdef _WIN32
-        return reinterpret_cast<void*>(GetProcAddress(
-            static_cast<HMODULE>(library), name));
+        const auto* module_base = reinterpret_cast<const std::byte*>(library);
+        const auto* dos_header = reinterpret_cast<const IMAGE_DOS_HEADER*>(module_base);
+        if (dos_header->e_magic != IMAGE_DOS_SIGNATURE) {
+            return nullptr;
+        }
+
+        const auto* nt_headers = reinterpret_cast<const IMAGE_NT_HEADERS*>(
+            module_base + dos_header->e_lfanew);
+        if (nt_headers->Signature != IMAGE_NT_SIGNATURE) {
+            return nullptr;
+        }
+
+        const IMAGE_DATA_DIRECTORY& export_directory =
+            nt_headers->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
+        if (export_directory.VirtualAddress == 0) {
+            return nullptr;
+        }
+
+        const auto* exports = reinterpret_cast<const IMAGE_EXPORT_DIRECTORY*>(
+            module_base + export_directory.VirtualAddress);
+        const auto* name_rvas = reinterpret_cast<const DWORD*>(
+            module_base + exports->AddressOfNames);
+        for (DWORD index = 0; index < exports->NumberOfNames; ++index) {
+            const auto* exported_name = reinterpret_cast<const char*>(
+                module_base + name_rvas[index]);
+            if (std::string_view{exported_name}.find(function_name)
+                != std::string_view::npos) {
+                return reinterpret_cast<void*>(GetProcAddress(
+                    static_cast<HMODULE>(library), exported_name));
+            }
+        }
+        return nullptr;
 #else
-        return dlsym(library, name);
+        (void)library;
+        (void)function_name;
+        return nullptr;
 #endif
     }
 
@@ -125,10 +145,10 @@ private:
             return;
         }
 
-        const auto create = reinterpret_cast<CreateModuleFunction>(
-            FindSymbol(library, kCreateModuleSymbol));
-        const auto destroy = reinterpret_cast<DestroyModuleFunction>(
-            FindSymbol(library, kDestroyModuleSymbol));
+        void* create_symbol = FindExport(library, "CreateModule");
+        void* destroy_symbol = FindExport(library, "DestroyModule");
+        const auto create = reinterpret_cast<CreateModuleFunction>(create_symbol);
+        const auto destroy = reinterpret_cast<DestroyModuleFunction>(destroy_symbol);
         if (create == nullptr || destroy == nullptr) {
             CloseLibrary(library);
             return;
@@ -151,7 +171,7 @@ private:
     std::vector<LoadedModule> modules_;
 };
 
-ModuleLoader::ModuleLoader(std::filesystem::path module_path)
+ModuleLoader::ModuleLoader(const std::filesystem::path& module_path)
     : impl_(std::make_unique<Impl>(module_path))
 {}
 

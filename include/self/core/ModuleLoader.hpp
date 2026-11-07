@@ -16,7 +16,7 @@
 class ModuleLoader
 {
 public:
-    explicit ModuleLoader(std::filesystem::path module_path);
+    explicit ModuleLoader(const std::filesystem::path& module_path);
     ~ModuleLoader();
 
     ModuleLoader(const ModuleLoader&) = delete;
