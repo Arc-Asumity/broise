@@ -9,7 +9,7 @@
 #pragma once
 
 #include <filesystem>
-#include <vector>
+#include <memory>
 
 #include <self/modules/IModule.hpp>
 
@@ -26,7 +26,8 @@ public:
     ModuleLoader& operator=(ModuleLoader&&) noexcept;
 
 private:
-    std::vector<Broise::IModule*> modules_;
+    class Impl;
+    std::unique_ptr<Impl> impl_;
 
 };
 

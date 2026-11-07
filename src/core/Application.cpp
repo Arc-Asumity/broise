@@ -15,7 +15,7 @@
 Application::Application(
     Renderer renderer, const std::filesystem::path& installed_directory)
     : renderer_(std::move(renderer))
-    , modules_(installed_directory / "mods")
+    , modules_(installed_directory)
 {}
 
 std::expected<Application, WindowError> Application::Create(

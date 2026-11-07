@@ -22,3 +22,6 @@ target_link_libraries(Broise_Runtime
     PRIVATE
         Broise::UI
 )
+if (CMAKE_DL_LIBS)
+    target_link_libraries(Broise_Runtime PRIVATE ${CMAKE_DL_LIBS})
+endif ()

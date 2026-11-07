@@ -20,3 +20,9 @@ add_subdirectory(ui)
 
 target_link_libraries(Broise PRIVATE Broise::Runtime)
 
+add_custom_command(TARGET Broise POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/test"
+        "$<TARGET_FILE_DIR:Broise>"
+)
+
