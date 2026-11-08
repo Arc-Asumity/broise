@@ -25,4 +25,8 @@ add_custom_command(TARGET Broise POST_BUILD
         "${CMAKE_SOURCE_DIR}/test"
         "$<TARGET_FILE_DIR:Broise>"
 )
-
+add_custom_command(TARGET Broise POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${BROISE_LUCIDE_ICONS_DIR}"
+        "$<TARGET_FILE_DIR:Broise>/assets/icons"
+)

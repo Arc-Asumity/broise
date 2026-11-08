@@ -15,20 +15,23 @@
 #include <self/core/Renderer.hpp>
 #include <self/ui/Font.hpp>
 
-Renderer::Renderer(Window window, Style style)
+Renderer::Renderer(Window window, Style style,
+                   std::filesystem::path icon_directory)
     : window_(std::move(window))
     , style_(std::move(style))
+    , icon_manager_(std::move(icon_directory))
 {}
 
 std::expected<Renderer, WindowError> Renderer::Create(
-    const char* title, Style style)
+    const char* title, Style style, std::filesystem::path icon_directory)
 {
     auto window = Window::Create(title);
     if (!window) {
         return std::unexpected(window.error());
     }
 
-    Renderer renderer(std::move(*window), std::move(style));
+    Renderer renderer(std::move(*window), std::move(style),
+                      std::move(icon_directory));
     renderer.Init();
     return renderer;
 }
@@ -36,6 +39,7 @@ std::expected<Renderer, WindowError> Renderer::Create(
 Renderer::Renderer(Renderer&& other) noexcept
     : window_(std::move(other.window_)),
       style_(std::move(other.style_)),
+      icon_manager_(std::move(other.icon_manager_)),
       program_(std::exchange(other.program_, 0)),
       vao_(std::exchange(other.vao_, 0)),
       vbo_(std::exchange(other.vbo_, 0))
@@ -49,6 +53,7 @@ Renderer& Renderer::operator=(Renderer&& other) noexcept
 
     window_ = std::move(other.window_);
     style_ = std::move(other.style_);
+    icon_manager_ = std::move(other.icon_manager_);
 
     if (vbo_ != 0) {
         glDeleteBuffers(1, &vbo_);
@@ -257,4 +262,14 @@ void Renderer::SwapBuffers() const
 const Window& Renderer::GetWindow() const noexcept
 {
     return window_;
+}
+
+IconManager& Renderer::GetIconManager() noexcept
+{
+    return icon_manager_;
+}
+
+const IconManager& Renderer::GetIconManager() const noexcept
+{
+    return icon_manager_;
 }

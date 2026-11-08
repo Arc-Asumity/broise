@@ -1,5 +1,6 @@
 add_library(Broise_Runtime SHARED
     Application.cpp
+    IconManager.cpp
     ModuleLoader.cpp
     WidgetManager.cpp
     Renderer.cpp

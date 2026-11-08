@@ -3,6 +3,22 @@ include(FetchContent)
 set(FETCHCONTENT_QUIET OFF)
 
 FetchContent_Declare(
+    lucide
+    GIT_REPOSITORY https://github.com/lucide-icons/lucide.git
+    GIT_TAG 1.62.0
+    GIT_SHALLOW TRUE
+)
+FetchContent_Populate(
+        lucide
+        SOURCE_DIR "${CMAKE_BINARY_DIR}/_deps/lucide-src"
+        GIT_REPOSITORY https://github.com/lucide-icons/lucide.git
+        GIT_TAG 1.62.0
+        GIT_SHALLOW TRUE
+)
+
+set(BROISE_LUCIDE_ICONS_DIR "${lucide_SOURCE_DIR}/icons")
+
+FetchContent_Declare(
         glfw
         GIT_REPOSITORY https://github.com/glfw/glfw.git
         GIT_TAG 3.4

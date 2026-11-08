@@ -26,7 +26,8 @@ std::expected<Application, WindowError> Application::Create(
         return std::unexpected(WindowError::StyleConfigurationFailed);
     }
 
-    auto renderer = Renderer::Create(title, std::move(*style));
+    auto renderer = Renderer::Create(
+        title, std::move(*style), installed_directory / "assets" / "icons");
     if (!renderer) {
         return std::unexpected(renderer.error());
     }

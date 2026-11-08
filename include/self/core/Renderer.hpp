@@ -14,13 +14,15 @@
 #include <self/ui/Window.hpp>
 #include <self/ui/Base.hpp>
 #include <self/ui/Style.hpp>
+#include <self/core/IconManager.hpp>
 
 
 class Renderer
 {
 public:
     [[nodiscard]] static std::expected<Renderer, WindowError>
-    Create(const char* title, Style style);
+    Create(const char* title, Style style,
+           std::filesystem::path icon_directory);
 
     ~Renderer();
 
@@ -37,15 +39,19 @@ public:
     void UpdateWindowInput();
     void SwapBuffers() const;
     [[nodiscard]] const Window& GetWindow() const noexcept;
+    [[nodiscard]] IconManager& GetIconManager() noexcept;
+    [[nodiscard]] const IconManager& GetIconManager() const noexcept;
 
 private:
 
     Window window_;
     Style style_;
+    IconManager icon_manager_;
 
     unsigned int program_{};
     unsigned int vao_{};
     unsigned int vbo_{};
 
-    Renderer(Window window, Style style);
+    Renderer(Window window, Style style,
+             std::filesystem::path icon_directory);
 };
