@@ -71,8 +71,6 @@ public:
 private:
     friend class WindowManager;
 
-    static std::expected<Window, WindowError> Create(const char* title);
-
     GLFWwindow* window_{};
     GLFWcursor* horizontal_resize_cursor_{};
     GLFWcursor* vertical_resize_cursor_{};

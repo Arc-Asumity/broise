@@ -26,6 +26,7 @@ public:
     WindowManager(WindowManager&& other) noexcept;
     WindowManager& operator=(WindowManager&& other) noexcept;
 
+    [[nodiscard]] std::expected<void, WindowError> InitGlfw();
     [[nodiscard]] std::expected<std::reference_wrapper<Window>, WindowError>
     CreateWindow(const char* title);
     void DestroyWindow(Window& window);

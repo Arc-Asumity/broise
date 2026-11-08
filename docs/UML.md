@@ -19,6 +19,7 @@ class Renderer {
 
 class WindowManager {
 - vector~Window~ windows_
++ InitGlfw()
 + CreateWindow() Window
 + DestroyWindow(window: Window)
 + PollEvents()
