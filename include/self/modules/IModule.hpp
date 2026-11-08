@@ -30,8 +30,11 @@ namespace Broise
     };
 
     extern "C" BROISE_MODULE_EXPORT
-    IModule* CreateModule() noexcept;
+    IModule* CreateModuleV1() noexcept;
 
     extern "C" BROISE_MODULE_EXPORT
-    void DestroyModule(const IModule* module) noexcept;
+    void DestroyModuleV1(const IModule* module) noexcept;
+
+    extern "C" BROISE_MODULE_EXPORT
+    const char* GetModuleAbiTagV1() noexcept;
 }

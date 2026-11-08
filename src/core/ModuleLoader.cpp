@@ -7,6 +7,7 @@
 // Loads native C++ modules from the installed mods directory.
 
 #include <algorithm>
+#include <cstring>
 #include <filesystem>
 #include <system_error>
 #include <utility>
@@ -24,6 +25,7 @@ namespace
 {
     using CreateModuleFunction = Broise::IModule* (*)() noexcept;
     using DestroyModuleFunction = void (*)(const Broise::IModule*) noexcept;
+    using GetModuleAbiTagFunction = const char* (*)() noexcept;
 
     void* OpenLibrary(const std::filesystem::path& path)
     {
@@ -106,11 +108,20 @@ private:
             return;
         }
 
-        void* create_symbol = FindExport(library, "CreateModule");
-        void* destroy_symbol = FindExport(library, "DestroyModule");
+        void* create_symbol = FindExport(library, "CreateModuleV1");
+        void* destroy_symbol = FindExport(library, "DestroyModuleV1");
+        void* abi_tag_symbol = FindExport(library, "GetModuleAbiTagV1");
         const auto create = reinterpret_cast<CreateModuleFunction>(create_symbol);
         const auto destroy = reinterpret_cast<DestroyModuleFunction>(destroy_symbol);
-        if (create == nullptr || destroy == nullptr) {
+        const auto get_abi_tag = reinterpret_cast<GetModuleAbiTagFunction>(
+            abi_tag_symbol);
+        if (create == nullptr || destroy == nullptr || get_abi_tag == nullptr) {
+            CloseLibrary(library);
+            return;
+        }
+
+        const char* abi_tag = get_abi_tag();
+        if (abi_tag == nullptr || std::strcmp(abi_tag, BROISE_MODULE_ABI_TAG) != 0) {
             CloseLibrary(library);
             return;
         }
