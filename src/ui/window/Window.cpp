@@ -3,7 +3,7 @@
 // Licensed under the GPLv3 or later.
 // https://github.com/Arc-Asumity/broise
 // ==============================================================
-// Path /src/core/Window.cpp
+// Path /src/ui/window/Window.cpp
 // Window for Broise.
 
 
@@ -14,7 +14,7 @@
 
 #include <glad/gl.h>
 
-#include <self/ui/Window.hpp>
+#include <self/ui/window/Window.hpp>
 #include <self/core/Renderer.hpp>
 #include <self/ui/Style.hpp>
 

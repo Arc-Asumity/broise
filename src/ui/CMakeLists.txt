@@ -2,7 +2,6 @@ add_library(Broise_UI
     Font.cpp
     Rect.cpp
     Style.cpp
-    Window.cpp
 )
 add_library(Broise::UI ALIAS Broise_UI)
 set_target_properties(Broise_UI PROPERTIES POSITION_INDEPENDENT_CODE ON)
@@ -17,3 +16,5 @@ target_link_libraries(Broise_UI
         freetype
         tomlplusplus::tomlplusplus
 )
+
+add_subdirectory(window)

@@ -3,7 +3,7 @@
 // Licensed under the GPLv3 or later.
 // https://github.com/Arc-Asumity/broise
 // ==============================================================
-// Path /include/self/core/Window.hpp
+// Path /include/self/ui/window/Window.hpp
 // Header for window.
 
 #pragma once

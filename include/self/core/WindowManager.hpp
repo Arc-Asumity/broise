@@ -12,7 +12,7 @@
 #include <functional>
 #include <vector>
 
-#include <self/ui/Window.hpp>
+#include <self/ui/window/Window.hpp>
 
 class WindowManager
 {

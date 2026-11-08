@@ -14,7 +14,7 @@
 #include <string_view>
 #include <unordered_map>
 
-#include <self/ui/Window.hpp>
+#include <self/ui/window/Window.hpp>
 #include <self/ui/Base.hpp>
 #include <self/ui/Style.hpp>
 #include <self/core/IconManager.hpp>
