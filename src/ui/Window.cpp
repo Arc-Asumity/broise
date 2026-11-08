@@ -7,7 +7,6 @@
 // Window for Broise.
 
 
-#include <algorithm>
 #include <glad/gl.h>
 #include <string_view>
 #include <utility>
@@ -346,7 +345,8 @@ int Window::GetLogicalHeight() const
 
 int Window::GetTitleBarHeight() const
 {
-    return std::clamp(GetLogicalHeight() / 18, 36, 80);
+    constexpr int kDesignTitleBarHeight = 90;
+    return static_cast<int>(static_cast<float>(kDesignTitleBarHeight) * kScale);
 }
 
 int Window::GetTitleBarControlWidth() const
