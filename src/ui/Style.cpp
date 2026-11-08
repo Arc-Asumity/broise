@@ -79,16 +79,19 @@ Style::Load(const std::filesystem::path& path)
     auto background = readColor(*colors, "background");
     auto bar = readColor(*colors, "bar");
     auto button = readColor(*colors, "button");
+    auto hover = readColor(*colors, "hover");
     auto text = readColor(*colors, "text");
     if (!background) return std::unexpected(background.error());
     if (!bar) return std::unexpected(bar.error());
     if (!button) return std::unexpected(button.error());
+    if (!hover) return std::unexpected(hover.error());
     if (!text) return std::unexpected(text.error());
     Style style;
     style.colors = {
         .background = *background,
         .bar = *bar,
         .button = *button,
+        .hover = *hover,
         .text = *text,
     };
     const std::filesystem::path install_directory =

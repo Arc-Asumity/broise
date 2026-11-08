@@ -27,6 +27,7 @@ struct StyleColors
     Color background{};
     Color bar{};
     Color button{};
+    Color hover{};
     Color text{};
 };
 

@@ -265,13 +265,22 @@ void Window::RenderTitleBar(Renderer& renderer, const Style& style) const
 
     const float close_left = window_width - control_width;
     const float minimize_left = window_width - control_width * 2.0f;
+    double cursor_x = 0.0;
+    double cursor_y = 0.0;
+    glfwGetCursorPos(window_, &cursor_x, &cursor_y);
+    const bool pointer_in_title_bar = cursor_y >= 0.0
+        && cursor_y < title_bar_height;
+    const bool minimize_hovered = pointer_in_title_bar
+        && cursor_x >= minimize_left && cursor_x < close_left;
+    const bool close_hovered = pointer_in_title_bar
+        && cursor_x >= close_left && cursor_x < window_width;
     renderer.RenderPolygon(
         make_rectangle(minimize_left, 0.0f, minimize_left + control_width,
                        title_bar_height),
-        style.colors.button);
+        minimize_hovered ? style.colors.hover : style.colors.button);
     renderer.RenderPolygon(
         make_rectangle(close_left, 0.0f, window_width, title_bar_height),
-        style.colors.button);
+        close_hovered ? style.colors.hover : style.colors.button);
 
     const float center_y = title_bar_height * 0.5f;
     const float icon_size = title_bar_height * 0.42f;
