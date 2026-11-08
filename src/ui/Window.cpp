@@ -7,13 +7,35 @@
 // Window for Broise.
 
 
-#include <glad/gl.h>
+#include <algorithm>
+#include <cmath>
 #include <string_view>
 #include <utility>
+
+#include <glad/gl.h>
 
 #include <self/ui/Window.hpp>
 #include <self/core/Renderer.hpp>
 #include <self/ui/Style.hpp>
+
+namespace
+{
+    float GetWindowScaleX(GLFWwindow* window)
+    {
+        float x_scale = 1.0f;
+        float y_scale = 1.0f;
+        glfwGetWindowContentScale(window, &x_scale, &y_scale);
+        return x_scale > 0.0f ? x_scale : 1.0f;
+    }
+
+    float GetWindowScaleY(GLFWwindow* window)
+    {
+        float x_scale = 1.0f;
+        float y_scale = 1.0f;
+        glfwGetWindowContentScale(window, &x_scale, &y_scale);
+        return y_scale > 0.0f ? y_scale : 1.0f;
+    }
+}
 
 std::expected<Window, WindowError>
 Window::Create(const char* title)
@@ -42,8 +64,8 @@ Window::Create(const char* title)
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
     auto* window = glfwCreateWindow(
-        static_cast<int>(static_cast<float>(mode->width) * kScale),
-        static_cast<int>(static_cast<float>(mode->height) * kScale),
+        static_cast<int>(static_cast<float>(mode->width) * kScreenSizeRatio),
+        static_cast<int>(static_cast<float>(mode->height) * kScreenSizeRatio),
         title,
         nullptr,
         nullptr
@@ -69,8 +91,8 @@ Window::Create(const char* title)
 
     glfwSetWindowPos(
         window,
-        monitorX + static_cast<int>(static_cast<float>(mode->width) * (1 - kScale) / 2),
-        monitorY + static_cast<int>(static_cast<float>(mode->height) * (1 - kScale) / 2)
+        monitorX + static_cast<int>(static_cast<float>(mode->width) * (1 - kScreenSizeRatio) / 2),
+        monitorY + static_cast<int>(static_cast<float>(mode->height) * (1 - kScreenSizeRatio) / 2)
     );
 
     glfwMakeContextCurrent(window);
@@ -169,11 +191,12 @@ void Window::UpdateTitleBarInput()
 
     int hovered_edges = resizing_ ? resize_edges_ : 0;
     if (!resizing_) {
-        constexpr double kResizeBorder = 7.0;
-        if (cursor_x < kResizeBorder) hovered_edges |= kResizeLeft;
-        if (cursor_x >= window_width - kResizeBorder) hovered_edges |= kResizeRight;
-        if (cursor_y < kResizeBorder) hovered_edges |= kResizeTop;
-        if (cursor_y >= window_height - kResizeBorder) hovered_edges |= kResizeBottom;
+        const double resize_border_x = 7.0 * GetWindowScaleX(window_);
+        const double resize_border_y = 7.0 * GetWindowScaleY(window_);
+        if (cursor_x < resize_border_x) hovered_edges |= kResizeLeft;
+        if (cursor_x >= window_width - resize_border_x) hovered_edges |= kResizeRight;
+        if (cursor_y < resize_border_y) hovered_edges |= kResizeTop;
+        if (cursor_y >= window_height - resize_border_y) hovered_edges |= kResizeBottom;
     }
     GLFWcursor* cursor = nullptr;
     if ((hovered_edges & (kResizeLeft | kResizeRight)) != 0
@@ -251,13 +274,21 @@ void Window::UpdateTitleBarInput()
             y += delta_y;
         }
 
-        if (width < 320) {
-            if ((resize_edges_ & kResizeLeft) != 0) x -= 320 - width;
-            width = 320;
+        const int minimum_width = static_cast<int>(
+            std::lround(320.0f * GetWindowScaleX(window_)));
+        const int minimum_height = static_cast<int>(
+            std::lround(200.0f * GetWindowScaleY(window_)));
+        if (width < minimum_width) {
+            if ((resize_edges_ & kResizeLeft) != 0) {
+                x -= minimum_width - width;
+            }
+            width = minimum_width;
         }
-        if (height < 200) {
-            if ((resize_edges_ & kResizeTop) != 0) y -= 200 - height;
-            height = 200;
+        if (height < minimum_height) {
+            if ((resize_edges_ & kResizeTop) != 0) {
+                y -= minimum_height - height;
+            }
+            height = minimum_height;
         }
         glfwSetWindowPos(window_, x, y);
         glfwSetWindowSize(window_, width, height);
@@ -356,13 +387,16 @@ int Window::GetLogicalHeight() const
 
 int Window::GetTitleBarHeight() const
 {
-    constexpr int kDesignTitleBarHeight = 90;
-    return static_cast<int>(static_cast<float>(kDesignTitleBarHeight) * kScale);
+    constexpr float kDesignTitleBarHeight = 32.0f;
+    return static_cast<int>(std::lround(
+        kDesignTitleBarHeight * GetWindowScaleY(window_)));
 }
 
 int Window::GetTitleBarControlWidth() const
 {
-    return GetTitleBarHeight() * 3 / 2;
+    constexpr float kDesignTitleBarControlWidth = 48.0f;
+    return static_cast<int>(std::lround(
+        kDesignTitleBarControlWidth * GetWindowScaleX(window_)));
 }
 
 void Window::RenderTitleBar(Renderer& renderer, const Style& style) const
@@ -416,17 +450,18 @@ void Window::RenderTitleBar(Renderer& renderer, const Style& style) const
         close_hovered ? style.colors.hover : style.colors.button);
 
     const float center_y = title_bar_height * 0.5f;
-    const float icon_size = title_bar_height * 0.42f;
+    const float icon_size_big = title_bar_height * 0.54f;
+    const float icon_size_small = title_bar_height * 0.42f;
     renderer.RenderIcon("minus",
-                        minimize_left + (control_width - icon_size) * 0.5f,
-                        center_y - icon_size * 0.5f,
-                        icon_size, icon_size, style.colors.text);
+                        minimize_left + (control_width - icon_size_small) * 0.5f,
+                        center_y - icon_size_small * 0.5f,
+                        icon_size_small, icon_size_small, style.colors.text);
     renderer.RenderIcon("square",
-                        maximize_left + (control_width - icon_size) * 0.5f,
-                        center_y - icon_size * 0.5f,
-                        icon_size, icon_size, style.colors.text);
+                        maximize_left + (control_width - icon_size_small) * 0.5f,
+                        center_y - icon_size_small * 0.5f,
+                        icon_size_small, icon_size_small, style.colors.text);
     renderer.RenderIcon("x",
-                        close_left + (control_width - icon_size) * 0.5f,
-                        center_y - icon_size * 0.5f,
-                        icon_size, icon_size, style.colors.text);
+                        close_left + (control_width - icon_size_big) * 0.5f,
+                        center_y - icon_size_big * 0.5f,
+                        icon_size_big, icon_size_big, style.colors.text);
 }

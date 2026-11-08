@@ -19,7 +19,7 @@
 class Renderer;
 struct Style;
 
-constexpr float kScale = 2.0f / 3.0f;
+constexpr float kScreenSizeRatio = 2.0f / 3.0f;
 
 enum class WindowError
 {
