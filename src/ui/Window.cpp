@@ -205,6 +205,12 @@ void Window::UpdateTitleBarInput()
         if (cursor_x >= window_width - control_width) {
             glfwSetWindowShouldClose(window_, GLFW_TRUE);
         } else if (cursor_x >= window_width - 2.0 * control_width) {
+            if (glfwGetWindowAttrib(window_, GLFW_MAXIMIZED) == GLFW_TRUE) {
+                glfwRestoreWindow(window_);
+            } else {
+                glfwMaximizeWindow(window_);
+            }
+        } else if (cursor_x >= window_width - 3.0 * control_width) {
             glfwIconifyWindow(window_);
         } else {
             dragging_title_bar_ = true;
@@ -380,20 +386,26 @@ void Window::RenderTitleBar(Renderer& renderer, const Style& style) const
         style.colors.bar);
 
     const float close_left = window_width - control_width;
-    const float minimize_left = window_width - control_width * 2.0f;
+    const float maximize_left = window_width - control_width * 2.0f;
+    const float minimize_left = window_width - control_width * 3.0f;
     double cursor_x = 0.0;
     double cursor_y = 0.0;
     glfwGetCursorPos(window_, &cursor_x, &cursor_y);
     const bool pointer_in_title_bar = cursor_y >= 0.0
         && cursor_y < title_bar_height;
     const bool minimize_hovered = pointer_in_title_bar
-        && cursor_x >= minimize_left && cursor_x < close_left;
+        && cursor_x >= minimize_left && cursor_x < maximize_left;
+    const bool maximize_hovered = pointer_in_title_bar
+        && cursor_x >= maximize_left && cursor_x < close_left;
     const bool close_hovered = pointer_in_title_bar
         && cursor_x >= close_left && cursor_x < window_width;
     renderer.RenderPolygon(
         make_rectangle(minimize_left, 0.0f, minimize_left + control_width,
                        title_bar_height),
         minimize_hovered ? style.colors.hover : style.colors.button);
+    renderer.RenderPolygon(
+        make_rectangle(maximize_left, 0.0f, close_left, title_bar_height),
+        maximize_hovered ? style.colors.hover : style.colors.button);
     renderer.RenderPolygon(
         make_rectangle(close_left, 0.0f, window_width, title_bar_height),
         close_hovered ? style.colors.hover : style.colors.button);
@@ -402,6 +414,10 @@ void Window::RenderTitleBar(Renderer& renderer, const Style& style) const
     const float icon_size = title_bar_height * 0.42f;
     renderer.RenderIcon("minus",
                         minimize_left + (control_width - icon_size) * 0.5f,
+                        center_y - icon_size * 0.5f,
+                        icon_size, icon_size, style.colors.text);
+    renderer.RenderIcon("square",
+                        maximize_left + (control_width - icon_size) * 0.5f,
                         center_y - icon_size * 0.5f,
                         icon_size, icon_size, style.colors.text);
     renderer.RenderIcon("x",
