@@ -16,6 +16,9 @@
 
 #include <self/ui/Base.hpp>
 
+class Renderer;
+struct Style;
+
 constexpr float kScale = 2.0f / 3.0f;
 
 enum class WindowError
@@ -36,6 +39,7 @@ public:
     static void PollEvents();
     void SwapBuffers() const;
     void UpdateTitleBarInput();
+    void RenderTitleBar(Renderer& renderer, const Style& style) const;
 
     [[nodiscard]]
     bool ShouldClose() const;

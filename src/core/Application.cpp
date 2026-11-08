@@ -51,6 +51,7 @@ void Application::Run()
         renderer_.PollEvents();
         renderer_.UpdateWindowInput();
         glClear(GL_COLOR_BUFFER_BIT);
+        renderer_.RenderTitleBar();
         renderer_.SwapBuffers();
     }
 }

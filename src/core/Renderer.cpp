@@ -239,6 +239,33 @@ void Renderer::RenderPolygon(const PointSet& points, const Color& color) const
     glUseProgram(0);
 }
 
+void Renderer::RenderSegments(const PointSet& points, const Color& color) const
+{
+    if (points.size() < 2 || points.size() % 2 != 0) {
+        return;
+    }
+
+    std::vector<float> vertices;
+    vertices.reserve(points.size() * 2);
+    for (const Point& point : points) {
+        vertices.push_back(point.x * 2.0f - 1.0f);
+        vertices.push_back(1.0f - point.y * 2.0f);
+    }
+
+    glUseProgram(program_);
+    const GLint color_location = glGetUniformLocation(program_, "u_color");
+    glUniform4f(color_location, color.r, color.g, color.b, color.a);
+    glBindVertexArray(vao_);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_);
+    glBufferData(GL_ARRAY_BUFFER,
+                 static_cast<GLsizeiptr>(vertices.size() * sizeof(float)),
+                 vertices.data(), GL_STREAM_DRAW);
+    glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(points.size()));
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    glUseProgram(0);
+}
+
 bool Renderer::ShouldClose() const
 {
     return window_.ShouldClose();
@@ -252,6 +279,11 @@ void Renderer::PollEvents() const
 void Renderer::UpdateWindowInput()
 {
     window_.UpdateTitleBarInput();
+}
+
+void Renderer::RenderTitleBar()
+{
+    window_.RenderTitleBar(*this, style_);
 }
 
 void Renderer::SwapBuffers() const

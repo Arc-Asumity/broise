@@ -9,9 +9,12 @@
 
 #include <algorithm>
 #include <glad/gl.h>
+#include <string_view>
 #include <utility>
 
 #include <self/ui/Window.hpp>
+#include <self/core/Renderer.hpp>
+#include <self/ui/Style.hpp>
 
 std::expected<Window, WindowError>
 Window::Create(const char* title)
@@ -233,4 +236,60 @@ int Window::GetTitleBarHeight() const
 int Window::GetTitleBarControlWidth() const
 {
     return GetTitleBarHeight() * 3 / 2;
+}
+
+void Window::RenderTitleBar(Renderer& renderer, const Style& style) const
+{
+    const float window_width = static_cast<float>(GetLogicalWidth());
+    const float window_height = static_cast<float>(GetLogicalHeight());
+    const float title_bar_height = static_cast<float>(GetTitleBarHeight());
+    const float control_width = static_cast<float>(GetTitleBarControlWidth());
+    if (window_width <= 0.0f || window_height <= 0.0f) {
+        return;
+    }
+
+    const auto make_rectangle = [window_width, window_height](
+                                    const float left, const float top,
+                                    const float right, const float bottom) {
+        return PointSet{
+            {left / window_width, top / window_height},
+            {right / window_width, top / window_height},
+            {right / window_width, bottom / window_height},
+            {left / window_width, bottom / window_height},
+        };
+    };
+
+    renderer.RenderPolygon(
+        make_rectangle(0.0f, 0.0f, window_width, title_bar_height),
+        style.colors.bar);
+
+    const float close_left = window_width - control_width;
+    const float minimize_left = window_width - control_width * 2.0f;
+    renderer.RenderPolygon(
+        make_rectangle(minimize_left, 0.0f, minimize_left + control_width,
+                       title_bar_height),
+        style.colors.button);
+    renderer.RenderPolygon(
+        make_rectangle(close_left, 0.0f, window_width, title_bar_height),
+        style.colors.button);
+
+    const float center_y = title_bar_height * 0.5f;
+    const float icon_size = title_bar_height * 0.42f;
+    const auto render_icon = [&](const std::string_view name,
+                                 const float center_x) {
+        auto icon_segments = renderer.GetIconManager().GetSegments(name);
+        if (!icon_segments) {
+            return;
+        }
+        for (Point& point : *icon_segments) {
+            point.x = (center_x - icon_size * 0.5f
+                       + point.x * icon_size) / window_width;
+            point.y = (center_y - icon_size * 0.5f
+                       + point.y * icon_size) / window_height;
+        }
+        renderer.RenderSegments(*icon_segments, style.colors.text);
+    };
+
+    render_icon("minus", minimize_left + control_width * 0.5f);
+    render_icon("x", close_left + control_width * 0.5f);
 }
