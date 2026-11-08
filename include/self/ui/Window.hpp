@@ -38,6 +38,7 @@ public:
 
     static void PollEvents();
     void SwapBuffers() const;
+    void SetIcon(const GLFWimage& icon) const;
     void UpdateTitleBarInput();
     void RenderTitleBar(Renderer& renderer, const Style& style) const;
 

@@ -34,6 +34,21 @@ std::expected<Renderer, WindowError> Renderer::Create(
 
     Renderer renderer(std::move(*window), std::move(style),
                       std::move(icon_directory));
+    if (auto icon = renderer.icon_manager_.GetIcon("broise")) {
+        auto document = lunasvg::Document::loadFromData(icon->svg);
+        if (document) {
+            auto bitmap = document->renderToBitmap(64, 64);
+            if (!bitmap.isNull()) {
+                bitmap.convertToRGBA();
+                const GLFWimage window_icon{
+                    .width = bitmap.width(),
+                    .height = bitmap.height(),
+                    .pixels = bitmap.data(),
+                };
+                renderer.window_.SetIcon(window_icon);
+            }
+        }
+    }
     renderer.Init();
     return renderer;
 }

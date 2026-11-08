@@ -139,6 +139,11 @@ void Window::SwapBuffers() const
     glfwSwapBuffers(window_);
 }
 
+void Window::SetIcon(const GLFWimage& icon) const
+{
+    glfwSetWindowIcon(window_, 1, &icon);
+}
+
 void Window::UpdateTitleBarInput()
 {
     const bool left_mouse_is_down =
@@ -157,7 +162,6 @@ void Window::UpdateTitleBarInput()
 
     const auto title_bar_height = static_cast<double>(GetTitleBarHeight());
     const auto control_width = static_cast<double>(GetTitleBarControlWidth());
-    constexpr double kResizeBorder = 7.0;
     constexpr int kResizeLeft = 1;
     constexpr int kResizeRight = 2;
     constexpr int kResizeTop = 4;
@@ -165,6 +169,7 @@ void Window::UpdateTitleBarInput()
 
     int hovered_edges = resizing_ ? resize_edges_ : 0;
     if (!resizing_) {
+        constexpr double kResizeBorder = 7.0;
         if (cursor_x < kResizeBorder) hovered_edges |= kResizeLeft;
         if (cursor_x >= window_width - kResizeBorder) hovered_edges |= kResizeRight;
         if (cursor_y < kResizeBorder) hovered_edges |= kResizeTop;
@@ -362,10 +367,10 @@ int Window::GetTitleBarControlWidth() const
 
 void Window::RenderTitleBar(Renderer& renderer, const Style& style) const
 {
-    const float window_width = static_cast<float>(GetLogicalWidth());
-    const float window_height = static_cast<float>(GetLogicalHeight());
-    const float title_bar_height = static_cast<float>(GetTitleBarHeight());
-    const float control_width = static_cast<float>(GetTitleBarControlWidth());
+    const auto window_width = static_cast<float>(GetLogicalWidth());
+    const auto window_height = static_cast<float>(GetLogicalHeight());
+    const auto title_bar_height = static_cast<float>(GetTitleBarHeight());
+    const auto control_width = static_cast<float>(GetTitleBarControlWidth());
     if (window_width <= 0.0f || window_height <= 0.0f) {
         return;
     }
@@ -374,10 +379,10 @@ void Window::RenderTitleBar(Renderer& renderer, const Style& style) const
                                     const float left, const float top,
                                     const float right, const float bottom) {
         return PointSet{
-            {left / window_width, top / window_height},
-            {right / window_width, top / window_height},
-            {right / window_width, bottom / window_height},
-            {left / window_width, bottom / window_height},
+            {.x = left / window_width, .y = top / window_height},
+            {.x = right / window_width, .y = top / window_height},
+            {.x = right / window_width, .y = bottom / window_height},
+            {.x = left / window_width, .y = bottom / window_height},
         };
     };
 
