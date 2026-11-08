@@ -42,16 +42,11 @@ Window::Create(const char* title)
 {
     Window self;
 
-    if (glfwInit() == GLFW_FALSE) {
-        return std::unexpected(WindowError::GlfwInitializationFailed);
-    }
-
     GLFWmonitor* monitor = glfwGetPrimaryMonitor();
     const GLFWvidmode* mode =
         glfwGetVideoMode(monitor);
 
     if (monitor == nullptr || mode == nullptr) {
-        glfwTerminate();
         return std::unexpected(
             WindowError::WindowCreationFailed
         );
@@ -72,7 +67,6 @@ Window::Create(const char* title)
     );
 
     if (window == nullptr) {
-        glfwTerminate();
         return std::unexpected(WindowError::WindowCreationFailed);
     }
 
@@ -100,7 +94,6 @@ Window::Create(const char* title)
 
     if (gladLoadGL(glfwGetProcAddress) == 0) {
         glfwDestroyWindow(window);
-        glfwTerminate();
         return std::unexpected(
             WindowError::OpenGLLoaderInitializationFailed
         );
@@ -147,13 +140,7 @@ Window::~Window()
     if (window_ != nullptr)
     {
         glfwDestroyWindow(window_);
-        glfwTerminate();
     }
-}
-
-void Window::PollEvents()
-{
-    glfwPollEvents();
 }
 
 void Window::SwapBuffers() const
@@ -337,7 +324,6 @@ Window& Window::operator=(Window&& other) noexcept
         if (diagonal_resize_cursor_ != nullptr) glfwDestroyCursor(diagonal_resize_cursor_);
         if (anti_diagonal_resize_cursor_ != nullptr) glfwDestroyCursor(anti_diagonal_resize_cursor_);
         glfwDestroyWindow(window_);
-        glfwTerminate();
     }
 
     window_ = std::exchange(other.window_, nullptr);

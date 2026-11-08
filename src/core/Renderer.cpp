@@ -17,22 +17,17 @@
 #include <self/core/Renderer.hpp>
 #include <self/ui/Font.hpp>
 
-Renderer::Renderer(Window window, Style style,
+Renderer::Renderer(Window& window, Style style,
                    std::filesystem::path icon_directory)
-    : window_(std::move(window))
+    : window_(&window)
     , style_(std::move(style))
     , icon_manager_(std::move(icon_directory))
 {}
 
 std::expected<Renderer, WindowError> Renderer::Create(
-    const char* title, Style style, std::filesystem::path icon_directory)
+    Window& window, Style style, std::filesystem::path icon_directory)
 {
-    auto window = Window::Create(title);
-    if (!window) {
-        return std::unexpected(window.error());
-    }
-
-    Renderer renderer(std::move(*window), std::move(style),
+    Renderer renderer(window, std::move(style),
                       std::move(icon_directory));
     if (auto icon = renderer.icon_manager_.GetIcon("broise")) {
         auto document = lunasvg::Document::loadFromData(icon->svg);
@@ -45,7 +40,7 @@ std::expected<Renderer, WindowError> Renderer::Create(
                     .height = bitmap.height(),
                     .pixels = bitmap.data(),
                 };
-                renderer.window_.SetIcon(window_icon);
+                renderer.window_->SetIcon(window_icon);
             }
         }
     }
@@ -54,7 +49,7 @@ std::expected<Renderer, WindowError> Renderer::Create(
 }
 
 Renderer::Renderer(Renderer&& other) noexcept
-    : window_(std::move(other.window_)),
+    : window_(std::exchange(other.window_, nullptr)),
       style_(std::move(other.style_)),
       icon_manager_(std::move(other.icon_manager_)),
       program_(std::exchange(other.program_, 0)),
@@ -73,7 +68,7 @@ Renderer& Renderer::operator=(Renderer&& other) noexcept
         glDeleteTextures(1, &texture);
     }
 
-    window_ = std::move(other.window_);
+    window_ = std::exchange(other.window_, nullptr);
     style_ = std::move(other.style_);
     icon_manager_ = std::move(other.icon_manager_);
 
@@ -312,8 +307,8 @@ void Renderer::RenderIcon(const std::string_view name, const float x,
         cached_texture = icon_textures_.emplace(key, texture).first;
     }
 
-    const float logical_width = static_cast<float>(window_.GetLogicalWidth());
-    const float logical_height = static_cast<float>(window_.GetLogicalHeight());
+    const float logical_width = static_cast<float>(window_->GetLogicalWidth());
+    const float logical_height = static_cast<float>(window_->GetLogicalHeight());
     if (logical_width <= 0.0f || logical_height <= 0.0f) return;
     const float left = x / logical_width * 2.0f - 1.0f;
     const float right = (x + width) / logical_width * 2.0f - 1.0f;
@@ -348,32 +343,27 @@ void Renderer::RenderIcon(const std::string_view name, const float x,
 
 bool Renderer::ShouldClose() const
 {
-    return window_.ShouldClose();
-}
-
-void Renderer::PollEvents() const
-{
-    Window::PollEvents();
+    return window_->ShouldClose();
 }
 
 void Renderer::UpdateWindowInput()
 {
-    window_.UpdateTitleBarInput();
+    window_->UpdateTitleBarInput();
 }
 
 void Renderer::RenderTitleBar()
 {
-    window_.RenderTitleBar(*this, style_);
+    window_->RenderTitleBar(*this, style_);
 }
 
 void Renderer::SwapBuffers() const
 {
-    window_.SwapBuffers();
+    window_->SwapBuffers();
 }
 
 const Window& Renderer::GetWindow() const noexcept
 {
-    return window_;
+    return *window_;
 }
 
 IconManager& Renderer::GetIconManager() noexcept

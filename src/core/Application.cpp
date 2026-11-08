@@ -13,10 +13,25 @@
 #include <self/core/Application.hpp>
 
 Application::Application(
-    Renderer renderer, const std::filesystem::path& installed_directory)
-    : renderer_(std::move(renderer))
-    , modules_(installed_directory)
+    WindowManager windows, Renderer renderer,
+    const std::filesystem::path& installed_directory)
+    : modules_(installed_directory)
+    , windows_(std::move(windows))
+    , renderer_(std::move(renderer))
 {}
+
+Application& Application::operator=(Application&& other) noexcept
+{
+    if (this == &other) {
+        return *this;
+    }
+
+    renderer_ = std::move(other.renderer_);
+    windows_ = std::move(other.windows_);
+    modules_ = std::move(other.modules_);
+    widgets_ = std::move(other.widgets_);
+    return *this;
+}
 
 std::expected<Application, WindowError> Application::Create(
     const char* title, const std::filesystem::path& installed_directory)
@@ -26,13 +41,21 @@ std::expected<Application, WindowError> Application::Create(
         return std::unexpected(WindowError::StyleConfigurationFailed);
     }
 
+    WindowManager windows;
+    auto window = windows.CreateWindow(title);
+    if (!window) {
+        return std::unexpected(window.error());
+    }
+
     auto renderer = Renderer::Create(
-        title, std::move(*style), installed_directory / "assets" / "icons");
+        window->get(), std::move(*style),
+        installed_directory / "assets" / "icons");
     if (!renderer) {
         return std::unexpected(renderer.error());
     }
 
-    return Application(std::move(*renderer), installed_directory);
+    return Application(std::move(windows), std::move(*renderer),
+                       installed_directory);
 }
 
 const ModuleLoader& Application::GetModuleManager() const noexcept
@@ -48,7 +71,7 @@ ModuleLoader& Application::GetModuleManager() noexcept
 void Application::Run()
 {
     while (!renderer_.ShouldClose()) {
-        renderer_.PollEvents();
+        windows_.PollEvents();
         renderer_.UpdateWindowInput();
         glClear(GL_COLOR_BUFFER_BIT);
         renderer_.RenderTitleBar();

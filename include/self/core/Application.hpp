@@ -11,8 +11,9 @@
 #include <expected>
 #include <filesystem>
 
-#include <self/core/Renderer.hpp>
 #include <self/core/ModuleLoader.hpp>
+#include <self/core/Renderer.hpp>
+#include <self/core/WindowManager.hpp>
 #include <self/core/WidgetManager.hpp>
 
 class Application
@@ -26,7 +27,7 @@ public:
     Application(const Application&) = delete;
     Application& operator=(const Application&) = delete;
     Application(Application&&) noexcept = default;
-    Application& operator=(Application&&) noexcept = default;
+    Application& operator=(Application&& other) noexcept;
 
     [[nodiscard]] const ModuleLoader& GetModuleManager() const noexcept;
     [[nodiscard]] ModuleLoader& GetModuleManager() noexcept;
@@ -34,11 +35,13 @@ public:
     void Run();
 
 private:
-    Application(Renderer renderer, const std::filesystem::path& installed_directory);
+    Application(WindowManager windows, Renderer renderer,
+                const std::filesystem::path& installed_directory);
 
-    Renderer renderer_;
     ModuleLoader modules_;
     WidgetManager widgets_;
+    WindowManager windows_;
+    Renderer renderer_;
 
 };
 

@@ -17,6 +17,7 @@
 #include <self/ui/Base.hpp>
 
 class Renderer;
+class WindowManager;
 struct Style;
 
 constexpr float kScreenSizeRatio = 2.0f / 3.0f;
@@ -31,12 +32,8 @@ enum class WindowError
 
 class Window {
 public:
-    static std::expected<Window, WindowError>
-    Create(const char* title);
-
     ~Window();
 
-    static void PollEvents();
     void SwapBuffers() const;
     void SetIcon(const GLFWimage& icon) const;
     void UpdateTitleBarInput();
@@ -72,6 +69,10 @@ public:
     }
 
 private:
+    friend class WindowManager;
+
+    static std::expected<Window, WindowError> Create(const char* title);
+
     GLFWwindow* window_{};
     GLFWcursor* horizontal_resize_cursor_{};
     GLFWcursor* vertical_resize_cursor_{};

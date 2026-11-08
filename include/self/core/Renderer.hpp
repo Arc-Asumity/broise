@@ -24,7 +24,7 @@ class Renderer
 {
 public:
     [[nodiscard]] static std::expected<Renderer, WindowError>
-    Create(const char* title, Style style,
+    Create(Window& window, Style style,
            std::filesystem::path icon_directory);
 
     ~Renderer();
@@ -40,7 +40,6 @@ public:
     void RenderIcon(std::string_view name, float x, float y,
                     float width, float height, const Color& color);
     [[nodiscard]] bool ShouldClose() const;
-    void PollEvents() const;
     void UpdateWindowInput();
     void RenderTitleBar();
     void SwapBuffers() const;
@@ -50,7 +49,7 @@ public:
 
 private:
 
-    Window window_;
+    Window* window_{};  // Non-owning; WindowManager owns this window.
     Style style_;
     IconManager icon_manager_;
 
@@ -59,6 +58,6 @@ private:
     unsigned int vbo_{};
     std::unordered_map<std::string, unsigned int> icon_textures_;
 
-    Renderer(Window window, Style style,
+    Renderer(Window& window, Style style,
              std::filesystem::path icon_directory);
 };

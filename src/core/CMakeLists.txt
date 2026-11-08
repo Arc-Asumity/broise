@@ -3,6 +3,7 @@ add_library(Broise_Runtime SHARED
     IconManager.cpp
     ModuleLoader.cpp
     WidgetManager.cpp
+    WindowManager.cpp
     Renderer.cpp
 )
 add_library(Broise::Runtime ALIAS Broise_Runtime)
