@@ -10,8 +10,6 @@
 
 #include <string_view>
 
-#include <self/ui/IPart.hpp>
-
 namespace Broise
 {
     class IWidget

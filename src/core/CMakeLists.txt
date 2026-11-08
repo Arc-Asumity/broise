@@ -22,6 +22,7 @@ target_link_libraries(Broise_Runtime
         Broise::ModuleAPI
     PRIVATE
         Broise::UI
+        lunasvg::lunasvg
 )
 if (CMAKE_DL_LIBS)
     target_link_libraries(Broise_Runtime PRIVATE ${CMAKE_DL_LIBS})

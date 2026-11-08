@@ -10,6 +10,9 @@
 #pragma once
 
 #include <expected>
+#include <string>
+#include <string_view>
+#include <unordered_map>
 
 #include <self/ui/Window.hpp>
 #include <self/ui/Base.hpp>
@@ -34,7 +37,8 @@ public:
 
     void Init();
     void RenderPolygon(const PointSet& points, const Color& color) const;
-    void RenderSegments(const PointSet& points, const Color& color) const;
+    void RenderIcon(std::string_view name, float x, float y,
+                    float width, float height, const Color& color);
     [[nodiscard]] bool ShouldClose() const;
     void PollEvents() const;
     void UpdateWindowInput();
@@ -53,6 +57,7 @@ private:
     unsigned int program_{};
     unsigned int vao_{};
     unsigned int vbo_{};
+    std::unordered_map<std::string, unsigned int> icon_textures_;
 
     Renderer(Window window, Style style,
              std::filesystem::path icon_directory);

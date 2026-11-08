@@ -30,7 +30,7 @@ namespace
     void* OpenLibrary(const std::filesystem::path& path)
     {
 #ifdef _WIN32
-        return static_cast<void*>(LoadLibraryW(path.c_str()));
+        return LoadLibraryW(path.c_str());
 #else
         return dlopen(path.c_str(), RTLD_NOW | RTLD_LOCAL);
 #endif

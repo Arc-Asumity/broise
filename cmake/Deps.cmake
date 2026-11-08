@@ -54,6 +54,14 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(tomlplusplus)
 
+FetchContent_Declare(
+    lunasvg
+    GIT_REPOSITORY https://github.com/sammycage/lunasvg.git
+    GIT_TAG v3.5.0
+    GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(lunasvg)
+
 set(FT_DISABLE_BZIP2 ON)
 set(FT_DISABLE_BROTLI ON)
 set(FT_DISABLE_HARFBUZZ ON)

@@ -10,7 +10,9 @@
 #include <stdexcept>
 #include <utility>
 #include <vector>
+#include <string>
 #include <glad/gl.h>
+#include <lunasvg.h>
 
 #include <self/core/Renderer.hpp>
 #include <self/ui/Font.hpp>
@@ -42,13 +44,18 @@ Renderer::Renderer(Renderer&& other) noexcept
       icon_manager_(std::move(other.icon_manager_)),
       program_(std::exchange(other.program_, 0)),
       vao_(std::exchange(other.vao_, 0)),
-      vbo_(std::exchange(other.vbo_, 0))
+      vbo_(std::exchange(other.vbo_, 0)),
+      icon_textures_(std::move(other.icon_textures_))
 {}
 
 Renderer& Renderer::operator=(Renderer&& other) noexcept
 {
     if (this == &other) {
         return *this;
+    }
+
+    for (const auto& [name, texture] : icon_textures_) {
+        glDeleteTextures(1, &texture);
     }
 
     window_ = std::move(other.window_);
@@ -70,6 +77,7 @@ Renderer& Renderer::operator=(Renderer&& other) noexcept
     program_ = std::exchange(other.program_, 0);
     vao_ = std::exchange(other.vao_, 0);
     vbo_ = std::exchange(other.vbo_, 0);
+    icon_textures_ = std::move(other.icon_textures_);
 
     return *this;
 }
@@ -80,9 +88,12 @@ namespace
         #version 460 core
 
         layout (location = 0) in vec2 a_position;
+        layout (location = 1) in vec2 a_uv;
+        out vec2 v_uv;
 
         void main()
         {
+            v_uv = a_uv;
             gl_Position = vec4(a_position, 0.0, 1.0);
         }
     )";
@@ -91,12 +102,16 @@ namespace
         #version 460 core
 
         uniform vec4 u_color;
+        uniform sampler2D u_texture;
+        uniform int u_use_texture;
+        in vec2 v_uv;
 
         out vec4 fragment_color;
 
         void main()
         {
-            fragment_color = u_color;
+            fragment_color = u_use_texture != 0
+                ? texture(u_texture, v_uv) * u_color : u_color;
         }
     )";
 
@@ -123,6 +138,9 @@ namespace
 
 Renderer::~Renderer()
 {
+    for (const auto& [name, texture] : icon_textures_) {
+        glDeleteTextures(1, &texture);
+    }
     if (vbo_ != 0) {
         glDeleteBuffers(1, &vbo_);
     }
@@ -174,9 +192,12 @@ void Renderer::Init()
         2,
         GL_FLOAT,
         GL_FALSE,
-        2 * sizeof(float),
+        4 * sizeof(float),
         nullptr
     );
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
+                          reinterpret_cast<void*>(2 * sizeof(float)));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -203,9 +224,12 @@ void Renderer::RenderPolygon(const PointSet& points, const Color& color) const
     for (const auto& [x, y] : points) {
         vertices.push_back(x * 2.0f - 1.0f);
         vertices.push_back(1.0f - y * 2.0f);
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);
     }
 
     glUseProgram(program_);
+    glUniform1i(glGetUniformLocation(program_, "u_use_texture"), 0);
 
     const GLint colorLocation =
     glGetUniformLocation(program_, "u_color");
@@ -239,31 +263,72 @@ void Renderer::RenderPolygon(const PointSet& points, const Color& color) const
     glUseProgram(0);
 }
 
-void Renderer::RenderSegments(const PointSet& points, const Color& color) const
+void Renderer::RenderIcon(const std::string_view name, const float x,
+                          const float y, const float width, const float height,
+                          const Color& color)
 {
-    if (points.size() < 2 || points.size() % 2 != 0) {
-        return;
+    const std::string key{name};
+    auto cached_texture = icon_textures_.find(key);
+    if (cached_texture == icon_textures_.end()) {
+        auto icon = icon_manager_.GetIcon(name);
+        if (!icon) return;
+
+        std::string svg = icon->svg;
+        std::string::size_type position = 0;
+        while ((position = svg.find("currentColor", position))
+               != std::string::npos) {
+            svg.replace(position, 12, "#ffffff");
+            position += 7;
+        }
+        auto document = lunasvg::Document::loadFromData(svg);
+        if (!document) return;
+        auto bitmap = document->renderToBitmap(64, 64);
+        if (bitmap.isNull()) return;
+        bitmap.convertToRGBA();
+
+        unsigned int texture = 0;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, bitmap.width(), bitmap.height(),
+                     0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap.data());
+        glBindTexture(GL_TEXTURE_2D, 0);
+        cached_texture = icon_textures_.emplace(key, texture).first;
     }
 
-    std::vector<float> vertices;
-    vertices.reserve(points.size() * 2);
-    for (const Point& point : points) {
-        vertices.push_back(point.x * 2.0f - 1.0f);
-        vertices.push_back(1.0f - point.y * 2.0f);
-    }
-
+    const float logical_width = static_cast<float>(window_.GetLogicalWidth());
+    const float logical_height = static_cast<float>(window_.GetLogicalHeight());
+    if (logical_width <= 0.0f || logical_height <= 0.0f) return;
+    const float left = x / logical_width * 2.0f - 1.0f;
+    const float right = (x + width) / logical_width * 2.0f - 1.0f;
+    const float top = 1.0f - y / logical_height * 2.0f;
+    const float bottom = 1.0f - (y + height) / logical_height * 2.0f;
+    const std::vector<float> vertices{
+        left, top, 0.0f, 1.0f, right, top, 1.0f, 1.0f,
+        right, bottom, 1.0f, 0.0f, left, top, 0.0f, 1.0f,
+        right, bottom, 1.0f, 0.0f, left, bottom, 0.0f, 0.0f,
+    };
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glUseProgram(program_);
-    const GLint color_location = glGetUniformLocation(program_, "u_color");
-    glUniform4f(color_location, color.r, color.g, color.b, color.a);
+    glUniform4f(glGetUniformLocation(program_, "u_color"),
+                color.r, color.g, color.b, color.a);
+    glUniform1i(glGetUniformLocation(program_, "u_use_texture"), 1);
+    glUniform1i(glGetUniformLocation(program_, "u_texture"), 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, cached_texture->second);
     glBindVertexArray(vao_);
     glBindBuffer(GL_ARRAY_BUFFER, vbo_);
     glBufferData(GL_ARRAY_BUFFER,
                  static_cast<GLsizeiptr>(vertices.size() * sizeof(float)),
                  vertices.data(), GL_STREAM_DRAW);
-    glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(points.size()));
+    glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
     glUseProgram(0);
+    glDisable(GL_BLEND);
 }
 
 bool Renderer::ShouldClose() const

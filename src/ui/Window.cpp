@@ -275,21 +275,12 @@ void Window::RenderTitleBar(Renderer& renderer, const Style& style) const
 
     const float center_y = title_bar_height * 0.5f;
     const float icon_size = title_bar_height * 0.42f;
-    const auto render_icon = [&](const std::string_view name,
-                                 const float center_x) {
-        auto icon_segments = renderer.GetIconManager().GetSegments(name);
-        if (!icon_segments) {
-            return;
-        }
-        for (Point& point : *icon_segments) {
-            point.x = (center_x - icon_size * 0.5f
-                       + point.x * icon_size) / window_width;
-            point.y = (center_y - icon_size * 0.5f
-                       + point.y * icon_size) / window_height;
-        }
-        renderer.RenderSegments(*icon_segments, style.colors.text);
-    };
-
-    render_icon("minus", minimize_left + control_width * 0.5f);
-    render_icon("x", close_left + control_width * 0.5f);
+    renderer.RenderIcon("minus",
+                        minimize_left + (control_width - icon_size) * 0.5f,
+                        center_y - icon_size * 0.5f,
+                        icon_size, icon_size, style.colors.text);
+    renderer.RenderIcon("x",
+                        close_left + (control_width - icon_size) * 0.5f,
+                        center_y - icon_size * 0.5f,
+                        icon_size, icon_size, style.colors.text);
 }
