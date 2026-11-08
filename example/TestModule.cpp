@@ -40,11 +40,13 @@ namespace
 
 namespace Broise
 {
+    extern "C" BROISE_MODULE_EXPORT
     IModule* CreateModule() noexcept
     {
         return new (std::nothrow) TestModule();
     }
 
+    extern "C" BROISE_MODULE_EXPORT
     void DestroyModule(const IModule* module) noexcept
     {
         delete module;

@@ -29,9 +29,9 @@ namespace Broise
         virtual bool Shutdown() noexcept = 0;
     };
 
-    BROISE_MODULE_EXPORT
+    extern "C" BROISE_MODULE_EXPORT
     IModule* CreateModule() noexcept;
 
-    BROISE_MODULE_EXPORT
+    extern "C" BROISE_MODULE_EXPORT
     void DestroyModule(const IModule* module) noexcept;
 }

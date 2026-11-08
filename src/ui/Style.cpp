@@ -93,9 +93,11 @@ Style::Load(const std::filesystem::path& path)
     style.title_bar_button_color = *title_button;
     style.close_button_color = *close_button;
     style.title_bar_icon_color = *title_icon;
-    const auto resolve_font_path = [&path](FontStyle& font) {
+    const std::filesystem::path install_directory =
+        path.parent_path().parent_path();
+    const auto resolve_font_path = [&install_directory](FontStyle& font) {
         if (font.file.is_relative()) {
-            font.file = path.parent_path() / font.file;
+            font.file = install_directory / font.file;
         }
     };
     for (const auto& [name, value] : *fonts) {

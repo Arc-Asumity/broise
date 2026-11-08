@@ -10,7 +10,7 @@
 
 #include <string_view>
 
-#include <self/parts/IPart.hpp>
+#include <self/ui/IPart.hpp>
 
 namespace Broise
 {

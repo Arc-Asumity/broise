@@ -7,9 +7,7 @@
 // Loads native C++ modules from the installed mods directory.
 
 #include <algorithm>
-#include <cstddef>
 #include <filesystem>
-#include <string_view>
 #include <system_error>
 #include <utility>
 #include <vector>
@@ -36,45 +34,13 @@ namespace
 #endif
     }
 
-    void* FindExport(void* library, const std::string_view function_name)
+    void* FindExport(void* library, const char* name)
     {
 #ifdef _WIN32
-        const auto* module_base = reinterpret_cast<const std::byte*>(library);
-        const auto* dos_header = reinterpret_cast<const IMAGE_DOS_HEADER*>(module_base);
-        if (dos_header->e_magic != IMAGE_DOS_SIGNATURE) {
-            return nullptr;
-        }
-
-        const auto* nt_headers = reinterpret_cast<const IMAGE_NT_HEADERS*>(
-            module_base + dos_header->e_lfanew);
-        if (nt_headers->Signature != IMAGE_NT_SIGNATURE) {
-            return nullptr;
-        }
-
-        const IMAGE_DATA_DIRECTORY& export_directory =
-            nt_headers->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
-        if (export_directory.VirtualAddress == 0) {
-            return nullptr;
-        }
-
-        const auto* exports = reinterpret_cast<const IMAGE_EXPORT_DIRECTORY*>(
-            module_base + export_directory.VirtualAddress);
-        const auto* name_rvas = reinterpret_cast<const DWORD*>(
-            module_base + exports->AddressOfNames);
-        for (DWORD index = 0; index < exports->NumberOfNames; ++index) {
-            const auto* exported_name = reinterpret_cast<const char*>(
-                module_base + name_rvas[index]);
-            if (std::string_view{exported_name}.find(function_name)
-                != std::string_view::npos) {
-                return reinterpret_cast<void*>(GetProcAddress(
-                    static_cast<HMODULE>(library), exported_name));
-            }
-        }
-        return nullptr;
+        return reinterpret_cast<void*>(GetProcAddress(
+            static_cast<HMODULE>(library), name));
 #else
-        (void)library;
-        (void)function_name;
-        return nullptr;
+        return dlsym(library, name);
 #endif
     }
 
@@ -116,7 +82,7 @@ public:
                 candidates.push_back(iterator->path());
             }
         }
-        std::sort(candidates.begin(), candidates.end());
+        std::ranges::sort(candidates);
 
         for (const auto& candidate : candidates) {
             Load(candidate);
@@ -125,16 +91,11 @@ public:
 
     ~Impl()
     {
-        for (auto iterator = modules_.rbegin(); iterator != modules_.rend();
-             ++iterator) {
-            LoadedModule& loaded = *iterator;
-            if (loaded.module->Shutdown()) {
-                loaded.destroy(loaded.module);
-                CloseLibrary(loaded.library);
+        for (auto iterator = modules_.rbegin(); iterator != modules_.rend(); ++iterator)
+            if (auto& [library, module, destroy] = *iterator; module->Shutdown()) {
+                destroy(module);
+                CloseLibrary(library);
             }
-            // Keep the DLL mapped if shutdown fails because module code may
-            // still own resources whose destructors live in that DLL.
-        }
     }
 
 private:
@@ -165,7 +126,7 @@ private:
             return;
         }
 
-        modules_.push_back({library, module, destroy});
+        modules_.push_back({.library = library, .module = module, .destroy = destroy});
     }
 
     std::vector<LoadedModule> modules_;
