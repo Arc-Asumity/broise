@@ -20,13 +20,15 @@ add_subdirectory(ui)
 
 target_link_libraries(Broise PRIVATE Broise::Runtime)
 
-add_custom_command(TARGET Broise POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
+add_custom_target(Broise_Update_Test
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_SOURCE_DIR}/test"
         "$<TARGET_FILE_DIR:Broise>"
+        COMMENT "Updating resource for test..."
 )
-add_custom_command(TARGET Broise POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
+add_custom_target(Broise_Update_Lucide
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${BROISE_LUCIDE_ICONS_DIR}"
         "$<TARGET_FILE_DIR:Broise>/assets/icons"
+        COMMENT "Updating Lucide icons..."
 )
