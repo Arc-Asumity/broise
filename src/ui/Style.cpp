@@ -68,31 +68,29 @@ Style::Load(const std::filesystem::path& path)
         return std::unexpected("Style configuration requires a [broise] table");
     }
 
-    const auto* colors = broise->get_as<toml::table>("style");
-    const auto* bar = colors == nullptr ? nullptr : colors->get_as<toml::table>("bar");
+    const auto* colors = broise->get_as<toml::table>("colors");
     const auto* fonts = broise->get_as<toml::table>("fonts");
-    if (colors == nullptr || bar == nullptr || fonts == nullptr) {
+    if (colors == nullptr || fonts == nullptr) {
         return std::unexpected(
-            "Style configuration requires [broise.style], [broise.style.bar], "
+            "Style configuration requires [broise.colors] "
             "and [broise.fonts] tables");
     }
 
     auto background = readColor(*colors, "background");
-    auto title_bar = readColor(*bar, "background");
-    auto title_button = readColor(*bar, "button");
-    auto close_button = readColor(*bar, "close_button");
-    auto title_icon = readColor(*bar, "icon");
+    auto bar = readColor(*colors, "bar");
+    auto button = readColor(*colors, "button");
+    auto text = readColor(*colors, "text");
     if (!background) return std::unexpected(background.error());
-    if (!title_bar) return std::unexpected(title_bar.error());
-    if (!title_button) return std::unexpected(title_button.error());
-    if (!close_button) return std::unexpected(close_button.error());
-    if (!title_icon) return std::unexpected(title_icon.error());
+    if (!bar) return std::unexpected(bar.error());
+    if (!button) return std::unexpected(button.error());
+    if (!text) return std::unexpected(text.error());
     Style style;
-    style.background_color = *background;
-    style.title_bar_color = *title_bar;
-    style.title_bar_button_color = *title_button;
-    style.close_button_color = *close_button;
-    style.title_bar_icon_color = *title_icon;
+    style.colors = {
+        .background = *background,
+        .bar = *bar,
+        .button = *button,
+        .text = *text,
+    };
     const std::filesystem::path install_directory =
         path.parent_path().parent_path();
     const auto resolve_font_path = [&install_directory](FontStyle& font) {
@@ -111,7 +109,7 @@ Style::Load(const std::filesystem::path& path)
         style.fonts.emplace(role, *font);
     }
 
-    for (const std::string role : {"common", "title", "latex"}) {
+    for (const std::string role : {"content", "title", "maths"}) {
         if (!style.fonts.contains(role)) {
             return std::unexpected("Missing required font role '" + role + "'");
         }

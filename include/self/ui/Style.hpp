@@ -22,13 +22,17 @@ struct FontStyle
     float size{};
 };
 
+struct StyleColors
+{
+    Color background{};
+    Color bar{};
+    Color button{};
+    Color text{};
+};
+
 struct Style
 {
-    Color background_color{};
-    Color title_bar_color{};
-    Color title_bar_button_color{};
-    Color close_button_color{};
-    Color title_bar_icon_color{};
+    StyleColors colors;
     std::unordered_map<std::string, FontStyle> fonts;
 
     [[nodiscard]] static std::expected<Style, std::string>

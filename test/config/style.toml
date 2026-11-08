@@ -1,20 +1,19 @@
-[broise.style]
+[broise.colors]
 background = [0.04, 0.05, 0.06, 1.0]
 
-[broise.style.bar]
-background = [0.12, 0.13, 0.15, 1.0]
+bar = [0.12, 0.13, 0.15, 1.0]
 button = [0.16, 0.17, 0.19, 1.0]
-close_button = [0.65, 0.12, 0.14, 1.0]
-icon = [0.92, 0.93, 0.95, 1.0]
 
-[broise.fonts.common]
-file = "assets/fonts/IBMPlexSans-Regular.ttf"
+text = [0.92, 0.93, 0.95, 1.0]
+
+[broise.fonts.content]
+file = "fonts/IBMPlexSans-Regular.ttf"
 size = 16.0
 
 [broise.fonts.title]
-file = "assets/fonts/IBMPlexSans-Medium.ttf"
+file = "fonts/IBMPlexSans-Medium.ttf"
 size = 18.0
 
-[broise.fonts.latex]
-file = "assets/fonts/IBMPlexMath-Regular.ttf"
+[broise.fonts.maths]
+file = "fonts/IBMPlexMath-Regular.ttf"
 size = 18.0
