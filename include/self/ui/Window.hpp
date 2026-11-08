@@ -72,15 +72,23 @@ public:
 
 private:
     GLFWwindow* window_{};
+    GLFWcursor* horizontal_resize_cursor_{};
+    GLFWcursor* vertical_resize_cursor_{};
+    GLFWcursor* diagonal_resize_cursor_{};
+    GLFWcursor* anti_diagonal_resize_cursor_{};
 
     int width_{};
     int height_{};
     bool left_mouse_was_down_{};
     bool dragging_title_bar_{};
+    bool resizing_{};
+    int resize_edges_{};
     int drag_start_window_x_{};
     int drag_start_window_y_{};
     double drag_start_cursor_x_{};
     double drag_start_cursor_y_{};
+    int resize_start_width_{};
+    int resize_start_height_{};
 
     Window() = default;
 
