@@ -42,10 +42,15 @@ class Window {
     - WindowStatus status_
     - WindowMetrics metrics_
     - WindowInteraction interaction_
+    - WindowContent content_
     + SwapBuffers()
     + ShouldClose() bool
     + GetStatus() WindowStatus
     + GetMetrics() WindowMetrics
+}
+
+class WindowContent {
+    + Render()
 }
 
 class WindowStatus {

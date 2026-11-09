@@ -19,8 +19,10 @@
 #include <self/ui/window/WindowInteraction.hpp>
 #include <self/ui/window/WindowMetrics.hpp>
 #include <self/ui/window/WindowStatus.hpp>
+#include <self/ui/window/WindowContent.hpp>
 
 class Renderer;
+class WindowContent;
 class WindowManager;
 struct Style;
 
@@ -41,7 +43,6 @@ public:
     void SwapBuffers() const;
     void SetIcon(const GLFWimage& icon) const;
     void UpdateTitleBarInput(CursorManager& cursor_manager);
-    void RenderTitleBar(Renderer& renderer, const Style& style) const;
 
     [[nodiscard]]
     bool ShouldClose() const;
@@ -76,11 +77,14 @@ public:
 
 private:
     friend class WindowManager;
+    friend class WindowContent;
+    friend class Renderer;
 
     GLFWwindow* handle_{};
     WindowStatus status_{};
     WindowMetrics metrics_{};
     WindowInteraction interaction_{};
+    WindowContent content_{};
 
     Window() = default;
 

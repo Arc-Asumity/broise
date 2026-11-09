@@ -348,7 +348,7 @@ bool Renderer::ShouldClose() const
 
 void Renderer::RenderTitleBar()
 {
-    window_->RenderTitleBar(*this, style_);
+    window_->content_.Render(*window_, *this, style_);
 }
 
 void Renderer::SwapBuffers() const
