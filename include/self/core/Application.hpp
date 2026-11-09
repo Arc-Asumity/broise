@@ -12,7 +12,7 @@
 #include <filesystem>
 
 #include <self/core/ModuleLoader.hpp>
-#include <self/core/Renderer.hpp>
+#include <self/ui/render/Renderer.hpp>
 #include <self/core/WindowManager.hpp>
 #include <self/core/WidgetManager.hpp>
 

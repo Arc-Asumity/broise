@@ -10,7 +10,7 @@
 
 #include <cmath>
 
-#include <self/core/Renderer.hpp>
+#include <self/ui/render/Renderer.hpp>
 #include <self/ui/Style.hpp>
 #include <self/ui/window/Window.hpp>
 

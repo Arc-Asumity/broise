@@ -3,7 +3,7 @@
 // Licensed under the GPLv3 or later.
 // https://github.com/Arc-Asumity/broise
 // ==============================================================
-// Path /include/self/core/Renderer.hpp
+// Path /include/self/ui/render/Renderer.hpp
 // Header file for render of UI.
 
 

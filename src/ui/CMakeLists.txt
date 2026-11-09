@@ -18,3 +18,4 @@ target_link_libraries(Broise_UI
 )
 
 add_subdirectory(window)
+add_subdirectory(render)

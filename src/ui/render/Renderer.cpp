@@ -3,7 +3,7 @@
 // Licensed under the GPLv3 or later.
 // https://github.com/Arc-Asumity/broise
 // ==============================================================
-// Path /src/ui/Renderer.cpp
+// Path /src/ui/render/Renderer.cpp
 // Renderer the ui.
 
 
@@ -13,7 +13,7 @@
 #include <string>
 #include <glad/gl.h>
 
-#include <self/core/Renderer.hpp>
+#include <self/ui/render/Renderer.hpp>
 #include <self/ui/Font.hpp>
 
 Renderer::Renderer(Style style,

@@ -4,7 +4,6 @@ add_library(Broise_Runtime SHARED
     ModuleLoader.cpp
     WidgetManager.cpp
     WindowManager.cpp
-    Renderer.cpp
 )
 add_library(Broise::Runtime ALIAS Broise_Runtime)
 get_filename_component(BROISE_RUNTIME_OUTPUT_DIRECTORY
