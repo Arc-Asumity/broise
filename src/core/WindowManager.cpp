@@ -97,6 +97,9 @@ WindowManager::CreateWindow(const char* title)
     return std::ref(windows_.back());
 }
 
+Window& WindowManager::GetWindow() { return windows_.front(); }
+const Window& WindowManager::GetWindow() const { return windows_.front(); }
+
 std::expected<void, WindowError> WindowManager::InitGlfw()
 {
     if (glfw_initialized_) {

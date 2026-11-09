@@ -36,7 +36,7 @@ void WindowContent::Render(
         };
     };
 
-    renderer.RenderPolygon(
+    renderer.RenderPolygon(window,
         make_rectangle(0.0f, 0.0f, window_width, title_bar_height),
         style.colors.bar);
 
@@ -54,29 +54,29 @@ void WindowContent::Render(
         && cursor_x >= maximize_left && cursor_x < close_left;
     const bool close_hovered = pointer_in_title_bar
         && cursor_x >= close_left && cursor_x < window_width;
-    renderer.RenderPolygon(
+    renderer.RenderPolygon(window,
         make_rectangle(minimize_left, 0.0f, minimize_left + control_width,
                        title_bar_height),
         minimize_hovered ? style.colors.hover : style.colors.button);
-    renderer.RenderPolygon(
+    renderer.RenderPolygon(window,
         make_rectangle(maximize_left, 0.0f, close_left, title_bar_height),
         maximize_hovered ? style.colors.hover : style.colors.button);
-    renderer.RenderPolygon(
+    renderer.RenderPolygon(window,
         make_rectangle(close_left, 0.0f, window_width, title_bar_height),
         close_hovered ? style.colors.hover : style.colors.button);
 
     const float center_y = title_bar_height * 0.5f;
     const float icon_size_big = title_bar_height * 0.54f;
     const float icon_size_small = title_bar_height * 0.42f;
-    renderer.RenderIcon("minus",
+    renderer.RenderIcon(window, "minus",
                         minimize_left + (control_width - icon_size_big) * 0.5f,
                         center_y - icon_size_big * 0.5f,
                         icon_size_big, icon_size_big, style.colors.text);
-    renderer.RenderIcon(window.GetStatus().maximized ? "copy" : "square",
+    renderer.RenderIcon(window, window.GetStatus().maximized ? "copy" : "square",
                         maximize_left + (control_width - icon_size_small) * 0.5f,
                         center_y - icon_size_small * 0.5f,
                         icon_size_small, icon_size_small, style.colors.text);
-    renderer.RenderIcon("x",
+    renderer.RenderIcon(window, "x",
                         close_left + (control_width - icon_size_big) * 0.5f,
                         center_y - icon_size_big * 0.5f,
                         icon_size_big, icon_size_big, style.colors.text);

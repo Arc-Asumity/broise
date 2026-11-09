@@ -25,7 +25,7 @@ class Renderer
 {
 public:
     [[nodiscard]] static std::expected<Renderer, WindowError>
-    Create(Window& window, WindowManager& window_manager, Style style,
+    Create(WindowManager& window_manager, Style style,
            std::filesystem::path icon_directory);
 
     ~Renderer();
@@ -37,17 +37,16 @@ public:
     Renderer& operator=(Renderer&& other) noexcept;
 
     void Init();
-    void RenderPolygon(const PointSet& points, const Color& color) const;
-    void RenderIcon(std::string_view name, float x, float y,
+    void RenderPolygon(const Window& window, const PointSet& points,
+                       const Color& color) const;
+    void RenderIcon(const Window& window, std::string_view name, float x, float y,
                     float width, float height, const Color& color);
-    [[nodiscard]] const Window& GetWindow() const noexcept;
     [[nodiscard]] const Style& GetStyle() const noexcept;
     [[nodiscard]] IconManager& GetIconManager() noexcept;
     [[nodiscard]] const IconManager& GetIconManager() const noexcept;
 
 private:
 
-    Window* window_{};  // Non-owning; WindowManager owns this window.
     Style style_;
     IconManager icon_manager_;
 
@@ -56,6 +55,6 @@ private:
     unsigned int vbo_{};
     std::unordered_map<std::string, unsigned int> icon_textures_;
 
-    Renderer(Window& window, Style style,
+    Renderer(Style style,
              std::filesystem::path icon_directory);
 };

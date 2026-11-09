@@ -30,6 +30,8 @@ public:
     [[nodiscard]] std::expected<void, WindowError> InitGlfw();
     [[nodiscard]] std::expected<std::reference_wrapper<Window>, WindowError>
     CreateWindow(const char* title);
+    [[nodiscard]] Window& GetWindow();
+    [[nodiscard]] const Window& GetWindow() const;
     void DestroyWindow(Window& window);
     void PollEvents() const;
     void UpdateWindowInput();

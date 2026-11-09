@@ -16,18 +16,17 @@
 #include <self/core/Renderer.hpp>
 #include <self/ui/Font.hpp>
 
-Renderer::Renderer(Window& window, Style style,
+Renderer::Renderer(Style style,
                    std::filesystem::path icon_directory)
-    : window_(&window)
-    , style_(std::move(style))
+    : style_(std::move(style))
     , icon_manager_(std::move(icon_directory))
 {}
 
 std::expected<Renderer, WindowError> Renderer::Create(
-    Window& window, WindowManager& window_manager, Style style,
+    WindowManager& window_manager, Style style,
     std::filesystem::path icon_directory)
 {
-    Renderer renderer(window, std::move(style),
+    Renderer renderer(std::move(style),
                       std::move(icon_directory));
     if (auto icon = renderer.icon_manager_.GetIcon("broise")) {
         const GLFWimage window_icon{
@@ -35,15 +34,14 @@ std::expected<Renderer, WindowError> Renderer::Create(
             .height = icon->height,
             .pixels = icon->rgba.data(),
         };
-        window_manager.SetIcon(window, window_icon);
+        window_manager.SetIcon(window_manager.GetWindow(), window_icon);
     }
     renderer.Init();
     return renderer;
 }
 
 Renderer::Renderer(Renderer&& other) noexcept
-    : window_(std::exchange(other.window_, nullptr)),
-      style_(std::move(other.style_)),
+    : style_(std::move(other.style_)),
       icon_manager_(std::move(other.icon_manager_)),
       program_(std::exchange(other.program_, 0)),
       vao_(std::exchange(other.vao_, 0)),
@@ -61,7 +59,6 @@ Renderer& Renderer::operator=(Renderer&& other) noexcept
         glDeleteTextures(1, &texture);
     }
 
-    window_ = std::exchange(other.window_, nullptr);
     style_ = std::move(other.style_);
     icon_manager_ = std::move(other.icon_manager_);
 
@@ -215,8 +212,10 @@ void Renderer::Init()
         } \
     } while (false)
 
-void Renderer::RenderPolygon(const PointSet& points, const Color& color) const
+void Renderer::RenderPolygon(const Window& window, const PointSet& points,
+                             const Color& color) const
 {
+    glfwMakeContextCurrent(window.handle_);
     if (points.size() < 3) {
         return;
     }
@@ -266,7 +265,7 @@ void Renderer::RenderPolygon(const PointSet& points, const Color& color) const
     glUseProgram(0);
 }
 
-void Renderer::RenderIcon(const std::string_view name, const float x,
+void Renderer::RenderIcon(const Window& window, const std::string_view name, const float x,
                           const float y, const float width, const float height,
                           const Color& color)
 {
@@ -287,8 +286,8 @@ void Renderer::RenderIcon(const std::string_view name, const float x,
         cached_texture = icon_textures_.emplace(key, texture).first;
     }
 
-    const float logical_width = static_cast<float>(window_->GetLogicalWidth());
-    const float logical_height = static_cast<float>(window_->GetLogicalHeight());
+    const float logical_width = static_cast<float>(window.GetLogicalWidth());
+    const float logical_height = static_cast<float>(window.GetLogicalHeight());
     if (logical_width <= 0.0f || logical_height <= 0.0f) return;
     const float left = x / logical_width * 2.0f - 1.0f;
     const float right = (x + width) / logical_width * 2.0f - 1.0f;
@@ -319,11 +318,6 @@ void Renderer::RenderIcon(const std::string_view name, const float x,
     glBindTexture(GL_TEXTURE_2D, 0);
     glUseProgram(0);
     glDisable(GL_BLEND);
-}
-
-const Window& Renderer::GetWindow() const noexcept
-{
-    return *window_;
 }
 
 const Style& Renderer::GetStyle() const noexcept

@@ -48,7 +48,7 @@ std::expected<Application, WindowError> Application::Create(
     }
 
     auto renderer = Renderer::Create(
-        window->get(), windows, std::move(*style),
+        windows, std::move(*style),
         installed_directory / "assets" / "icons");
     if (!renderer) {
         return std::unexpected(renderer.error());
@@ -70,11 +70,11 @@ ModuleLoader& Application::GetModuleManager() noexcept
 
 void Application::Run()
 {
-    while (!windows_.ShouldClose(renderer_.GetWindow())) {
+    while (!windows_.ShouldClose(windows_.GetWindow())) {
         windows_.PollEvents();
         windows_.UpdateWindowInput();
         glClear(GL_COLOR_BUFFER_BIT);
-        renderer_.GetWindow().RenderContent(renderer_, renderer_.GetStyle());
-        windows_.SwapBuffers(renderer_.GetWindow());
+        windows_.GetWindow().RenderContent(renderer_, renderer_.GetStyle());
+        windows_.SwapBuffers(windows_.GetWindow());
     }
 }
