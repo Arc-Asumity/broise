@@ -43,6 +43,7 @@ public:
     void SwapBuffers() const;
     void SetIcon(const GLFWimage& icon) const;
     void UpdateTitleBarInput(CursorManager& cursor_manager);
+    void RenderContent(Renderer& renderer, const Style& style) const;
 
     [[nodiscard]]
     bool ShouldClose() const;

@@ -18,5 +18,5 @@ class WindowContent
 {
 public:
     void UpdateTitleBarInput(Window& window, CursorManager& cursor_manager);
-    void Render(Window& window, Renderer& renderer, const Style& style) const;
+    void Render(const Window& window, Renderer& renderer, const Style& style) const;
 };

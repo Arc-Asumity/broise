@@ -40,9 +40,9 @@ public:
     void RenderIcon(std::string_view name, float x, float y,
                     float width, float height, const Color& color);
     [[nodiscard]] bool ShouldClose() const;
-    void RenderTitleBar();
     void SwapBuffers() const;
     [[nodiscard]] const Window& GetWindow() const noexcept;
+    [[nodiscard]] const Style& GetStyle() const noexcept;
     [[nodiscard]] IconManager& GetIconManager() noexcept;
     [[nodiscard]] const IconManager& GetIconManager() const noexcept;
 

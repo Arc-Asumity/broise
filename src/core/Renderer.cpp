@@ -346,11 +346,6 @@ bool Renderer::ShouldClose() const
     return window_->ShouldClose();
 }
 
-void Renderer::RenderTitleBar()
-{
-    window_->content_.Render(*window_, *this, style_);
-}
-
 void Renderer::SwapBuffers() const
 {
     window_->SwapBuffers();
@@ -359,6 +354,11 @@ void Renderer::SwapBuffers() const
 const Window& Renderer::GetWindow() const noexcept
 {
     return *window_;
+}
+
+const Style& Renderer::GetStyle() const noexcept
+{
+    return style_;
 }
 
 IconManager& Renderer::GetIconManager() noexcept

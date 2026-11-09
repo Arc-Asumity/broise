@@ -15,7 +15,7 @@
 #include <self/ui/window/Window.hpp>
 
 void WindowContent::Render(
-    Window& window, Renderer& renderer, const Style& style) const
+    const Window& window, Renderer& renderer, const Style& style) const
 {
     const auto window_width = static_cast<float>(window.GetLogicalWidth());
     const auto window_height = static_cast<float>(window.GetLogicalHeight());

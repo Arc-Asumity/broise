@@ -51,6 +51,11 @@ void Window::SetIcon(const GLFWimage& icon) const
     glfwSetWindowIcon(handle_, 1, &icon);
 }
 
+void Window::RenderContent(Renderer& renderer, const Style& style) const
+{
+    content_.Render(*this, renderer, style);
+}
+
 void Window::UpdateTitleBarInput(CursorManager& cursor_manager)
 {
     content_.UpdateTitleBarInput(*this, cursor_manager);

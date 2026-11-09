@@ -74,7 +74,7 @@ void Application::Run()
         windows_.PollEvents();
         windows_.UpdateWindowInput();
         glClear(GL_COLOR_BUFFER_BIT);
-        renderer_.RenderTitleBar();
+        renderer_.GetWindow().RenderContent(renderer_, renderer_.GetStyle());
         renderer_.SwapBuffers();
     }
 }
