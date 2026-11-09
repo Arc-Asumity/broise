@@ -346,11 +346,6 @@ bool Renderer::ShouldClose() const
     return window_->ShouldClose();
 }
 
-void Renderer::UpdateWindowInput()
-{
-    window_->UpdateTitleBarInput();
-}
-
 void Renderer::RenderTitleBar()
 {
     window_->RenderTitleBar(*this, style_);

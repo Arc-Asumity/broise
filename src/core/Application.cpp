@@ -72,7 +72,7 @@ void Application::Run()
 {
     while (!renderer_.ShouldClose()) {
         windows_.PollEvents();
-        renderer_.UpdateWindowInput();
+        windows_.UpdateWindowInput();
         glClear(GL_COLOR_BUFFER_BIT);
         renderer_.RenderTitleBar();
         renderer_.SwapBuffers();

@@ -15,6 +15,9 @@
 #include <GLFW/glfw3.h>
 
 #include <self/ui/Base.hpp>
+#include <self/ui/window/WindowInteraction.hpp>
+#include <self/ui/window/WindowMetrics.hpp>
+#include <self/ui/window/WindowStatus.hpp>
 
 class Renderer;
 class WindowManager;
@@ -36,11 +39,16 @@ public:
 
     void SwapBuffers() const;
     void SetIcon(const GLFWimage& icon) const;
-    void UpdateTitleBarInput();
+    void UpdateTitleBarInput(GLFWcursor* horizontal_resize_cursor,
+                             GLFWcursor* vertical_resize_cursor,
+                             GLFWcursor* diagonal_resize_cursor,
+                             GLFWcursor* anti_diagonal_resize_cursor);
     void RenderTitleBar(Renderer& renderer, const Style& style) const;
 
     [[nodiscard]]
     bool ShouldClose() const;
+    [[nodiscard]] WindowStatus GetStatus() const;
+    [[nodiscard]] WindowMetrics GetMetrics() const;
 
     Window(const Window&) = delete;
     Window& operator=(const Window&) = delete;
@@ -62,8 +70,8 @@ public:
             glfwGetWindowUserPointer(window));
         if (!self) return;
 
-        self->width_ = width;
-        self->height_ = height;
+        self->metrics_.framebuffer_width = width;
+        self->metrics_.framebuffer_height = height;
 
         glViewport(0, 0, width, height);
     }
@@ -71,24 +79,10 @@ public:
 private:
     friend class WindowManager;
 
-    GLFWwindow* window_{};
-    GLFWcursor* horizontal_resize_cursor_{};
-    GLFWcursor* vertical_resize_cursor_{};
-    GLFWcursor* diagonal_resize_cursor_{};
-    GLFWcursor* anti_diagonal_resize_cursor_{};
-
-    int width_{};
-    int height_{};
-    bool left_mouse_was_down_{};
-    bool dragging_title_bar_{};
-    bool resizing_{};
-    int resize_edges_{};
-    int drag_start_window_x_{};
-    int drag_start_window_y_{};
-    double drag_start_cursor_x_{};
-    double drag_start_cursor_y_{};
-    int resize_start_width_{};
-    int resize_start_height_{};
+    GLFWwindow* handle_{};
+    WindowStatus status_{};
+    WindowMetrics metrics_{};
+    WindowInteraction interaction_{};
 
     Window() = default;
 

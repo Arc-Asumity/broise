@@ -31,10 +31,15 @@ public:
     CreateWindow(const char* title);
     void DestroyWindow(Window& window);
     void PollEvents() const;
+    void UpdateWindowInput();
 
 private:
     void Shutdown() noexcept;
 
     std::vector<Window> windows_;
+    GLFWcursor* horizontal_resize_cursor_{};
+    GLFWcursor* vertical_resize_cursor_{};
+    GLFWcursor* diagonal_resize_cursor_{};
+    GLFWcursor* anti_diagonal_resize_cursor_{};
     bool glfw_initialized_{};
 };

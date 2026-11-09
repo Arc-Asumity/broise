@@ -21,6 +21,14 @@ WindowManager::~WindowManager()
 
 WindowManager::WindowManager(WindowManager&& other) noexcept
     : windows_(std::move(other.windows_))
+    , horizontal_resize_cursor_(
+          std::exchange(other.horizontal_resize_cursor_, nullptr))
+    , vertical_resize_cursor_(
+          std::exchange(other.vertical_resize_cursor_, nullptr))
+    , diagonal_resize_cursor_(
+          std::exchange(other.diagonal_resize_cursor_, nullptr))
+    , anti_diagonal_resize_cursor_(
+          std::exchange(other.anti_diagonal_resize_cursor_, nullptr))
     , glfw_initialized_(std::exchange(other.glfw_initialized_, false))
 {}
 
@@ -37,6 +45,14 @@ WindowManager& WindowManager::operator=(WindowManager&& other) noexcept
         glfw_initialized_ = false;
     }
     windows_ = std::move(other.windows_);
+    horizontal_resize_cursor_ =
+        std::exchange(other.horizontal_resize_cursor_, nullptr);
+    vertical_resize_cursor_ =
+        std::exchange(other.vertical_resize_cursor_, nullptr);
+    diagonal_resize_cursor_ =
+        std::exchange(other.diagonal_resize_cursor_, nullptr);
+    anti_diagonal_resize_cursor_ =
+        std::exchange(other.anti_diagonal_resize_cursor_, nullptr);
     glfw_initialized_ = glfw_initialized_
         || std::exchange(other.glfw_initialized_, false);
     return *this;
@@ -64,15 +80,6 @@ WindowManager::CreateWindow(const char* title)
     }
 
     Window window;
-    window.horizontal_resize_cursor_ =
-        glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
-    window.vertical_resize_cursor_ =
-        glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
-    window.diagonal_resize_cursor_ =
-        glfwCreateStandardCursor(GLFW_RESIZE_NWSE_CURSOR);
-    window.anti_diagonal_resize_cursor_ =
-        glfwCreateStandardCursor(GLFW_RESIZE_NESW_CURSOR);
-
     int monitor_x = 0;
     int monitor_y = 0;
     glfwGetMonitorPos(monitor, &monitor_x, &monitor_y);
@@ -93,9 +100,9 @@ WindowManager::CreateWindow(const char* title)
     glfwGetFramebufferSize(native_window, &framebuffer_width, &framebuffer_height);
     glViewport(0, 0, framebuffer_width, framebuffer_height);
 
-    window.width_ = framebuffer_width;
-    window.height_ = framebuffer_height;
-    window.window_ = native_window;
+    window.metrics_.framebuffer_width = framebuffer_width;
+    window.metrics_.framebuffer_height = framebuffer_height;
+    window.handle_ = native_window;
     glfwSetWindowUserPointer(native_window, &window);
     glfwSetFramebufferSizeCallback(
         native_window, Window::FramebufferSizeCallback);
@@ -119,6 +126,11 @@ std::expected<void, WindowError> WindowManager::InitGlfw()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+
+    horizontal_resize_cursor_ = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
+    vertical_resize_cursor_ = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
+    diagonal_resize_cursor_ = glfwCreateStandardCursor(GLFW_RESIZE_NWSE_CURSOR);
+    anti_diagonal_resize_cursor_ = glfwCreateStandardCursor(GLFW_RESIZE_NESW_CURSOR);
     return {};
 }
 
@@ -140,10 +152,31 @@ void WindowManager::PollEvents() const
     }
 }
 
+void WindowManager::UpdateWindowInput()
+{
+    for (auto& window : windows_) {
+        window.UpdateTitleBarInput(
+            horizontal_resize_cursor_, vertical_resize_cursor_,
+            diagonal_resize_cursor_, anti_diagonal_resize_cursor_);
+    }
+}
+
 void WindowManager::Shutdown() noexcept
 {
     windows_.clear();
     if (glfw_initialized_) {
+        if (horizontal_resize_cursor_ != nullptr) {
+            glfwDestroyCursor(horizontal_resize_cursor_);
+        }
+        if (vertical_resize_cursor_ != nullptr) {
+            glfwDestroyCursor(vertical_resize_cursor_);
+        }
+        if (diagonal_resize_cursor_ != nullptr) {
+            glfwDestroyCursor(diagonal_resize_cursor_);
+        }
+        if (anti_diagonal_resize_cursor_ != nullptr) {
+            glfwDestroyCursor(anti_diagonal_resize_cursor_);
+        }
         glfwTerminate();
         glfw_initialized_ = false;
     }

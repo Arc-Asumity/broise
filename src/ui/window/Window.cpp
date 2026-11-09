@@ -39,49 +39,41 @@ namespace
 
 Window::~Window()
 {
-    if (horizontal_resize_cursor_ != nullptr) {
-        glfwDestroyCursor(horizontal_resize_cursor_);
-    }
-    if (vertical_resize_cursor_ != nullptr) {
-        glfwDestroyCursor(vertical_resize_cursor_);
-    }
-    if (diagonal_resize_cursor_ != nullptr) {
-        glfwDestroyCursor(diagonal_resize_cursor_);
-    }
-    if (anti_diagonal_resize_cursor_ != nullptr) {
-        glfwDestroyCursor(anti_diagonal_resize_cursor_);
-    }
-    if (window_ != nullptr)
+    if (handle_ != nullptr)
     {
-        glfwDestroyWindow(window_);
+        glfwDestroyWindow(handle_);
     }
 }
 
 void Window::SwapBuffers() const
 {
-    glfwSwapBuffers(window_);
+    glfwSwapBuffers(handle_);
 }
 
 void Window::SetIcon(const GLFWimage& icon) const
 {
-    glfwSetWindowIcon(window_, 1, &icon);
+    glfwSetWindowIcon(handle_, 1, &icon);
 }
 
-void Window::UpdateTitleBarInput()
+void Window::UpdateTitleBarInput(
+    GLFWcursor* horizontal_resize_cursor,
+    GLFWcursor* vertical_resize_cursor,
+    GLFWcursor* diagonal_resize_cursor,
+    GLFWcursor* anti_diagonal_resize_cursor)
 {
     const bool left_mouse_is_down =
-        glfwGetMouseButton(window_, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
+        glfwGetMouseButton(handle_, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
     double cursor_x = 0.0;
     double cursor_y = 0.0;
-    glfwGetCursorPos(window_, &cursor_x, &cursor_y);
+    glfwGetCursorPos(handle_, &cursor_x, &cursor_y);
 
     int window_width = 0;
     int window_height = 0;
-    glfwGetWindowSize(window_, &window_width, &window_height);
+    glfwGetWindowSize(handle_, &window_width, &window_height);
 
     int window_x = 0;
     int window_y = 0;
-    glfwGetWindowPos(window_, &window_x, &window_y);
+    glfwGetWindowPos(handle_, &window_x, &window_y);
 
     const auto title_bar_height = static_cast<double>(GetTitleBarHeight());
     const auto control_width = static_cast<double>(GetTitleBarControlWidth());
@@ -90,10 +82,11 @@ void Window::UpdateTitleBarInput()
     constexpr int kResizeTop = 4;
     constexpr int kResizeBottom = 8;
 
-    int hovered_edges = resizing_ ? resize_edges_ : 0;
-    if (!resizing_) {
-        const double resize_border_x = 7.0 * GetWindowScaleX(window_);
-        const double resize_border_y = 7.0 * GetWindowScaleY(window_);
+    int hovered_edges = interaction_.mode == WindowInteractionMode::Resizing
+        ? interaction_.resize_edges : 0;
+    if (interaction_.mode != WindowInteractionMode::Resizing) {
+        const double resize_border_x = 7.0 * GetWindowScaleX(handle_);
+        const double resize_border_y = 7.0 * GetWindowScaleY(handle_);
         if (cursor_x < resize_border_x) hovered_edges |= kResizeLeft;
         if (cursor_x >= window_width - resize_border_x) hovered_edges |= kResizeRight;
         if (cursor_y < resize_border_y) hovered_edges |= kResizeTop;
@@ -105,124 +98,146 @@ void Window::UpdateTitleBarInput()
         const bool same_diagonal =
             ((hovered_edges & kResizeLeft) != 0)
                 == ((hovered_edges & kResizeTop) != 0);
-        cursor = same_diagonal ? diagonal_resize_cursor_
-                               : anti_diagonal_resize_cursor_;
+        cursor = same_diagonal ? diagonal_resize_cursor
+                               : anti_diagonal_resize_cursor;
     } else if ((hovered_edges & (kResizeLeft | kResizeRight)) != 0) {
-        cursor = horizontal_resize_cursor_;
+        cursor = horizontal_resize_cursor;
     } else if ((hovered_edges & (kResizeTop | kResizeBottom)) != 0) {
-        cursor = vertical_resize_cursor_;
+        cursor = vertical_resize_cursor;
     }
-    glfwSetCursor(window_, cursor);
+    glfwSetCursor(handle_, cursor);
 
-    if (left_mouse_is_down && !left_mouse_was_down_) {
-        resize_edges_ = hovered_edges;
+    if (left_mouse_is_down && !interaction_.left_mouse_down) {
+        interaction_.resize_edges = hovered_edges;
 
-        if (resize_edges_ != 0) {
-            resizing_ = true;
-            dragging_title_bar_ = false;
-            drag_start_window_x_ = window_x;
-            drag_start_window_y_ = window_y;
-            resize_start_width_ = window_width;
-            resize_start_height_ = window_height;
-            drag_start_cursor_x_ = static_cast<double>(window_x) + cursor_x;
-            drag_start_cursor_y_ = static_cast<double>(window_y) + cursor_y;
+        if (interaction_.resize_edges != 0) {
+            interaction_.mode = WindowInteractionMode::Resizing;
+            interaction_.drag_start_window_x = window_x;
+            interaction_.drag_start_window_y = window_y;
+            interaction_.resize_start_width = window_width;
+            interaction_.resize_start_height = window_height;
+            interaction_.drag_start_cursor_x = static_cast<double>(window_x) + cursor_x;
+            interaction_.drag_start_cursor_y = static_cast<double>(window_y) + cursor_y;
         }
     }
 
-    if (left_mouse_is_down && !left_mouse_was_down_ && !resizing_
+    if (left_mouse_is_down && !interaction_.left_mouse_down
+        && interaction_.mode != WindowInteractionMode::Resizing
         && cursor_y < title_bar_height) {
         if (cursor_x >= window_width - control_width) {
-            glfwSetWindowShouldClose(window_, GLFW_TRUE);
+            glfwSetWindowShouldClose(handle_, GLFW_TRUE);
+            status_.should_close = true;
         } else if (cursor_x >= window_width - 2.0 * control_width) {
-            if (glfwGetWindowAttrib(window_, GLFW_MAXIMIZED) == GLFW_TRUE) {
-                glfwRestoreWindow(window_);
+            if (glfwGetWindowAttrib(handle_, GLFW_MAXIMIZED) == GLFW_TRUE) {
+                glfwRestoreWindow(handle_);
             } else {
-                glfwMaximizeWindow(window_);
+                glfwMaximizeWindow(handle_);
             }
         } else if (cursor_x >= window_width - 3.0 * control_width) {
-            glfwIconifyWindow(window_);
+            glfwIconifyWindow(handle_);
         } else {
-            dragging_title_bar_ = true;
-            drag_start_window_x_ = window_x;
-            drag_start_window_y_ = window_y;
-            drag_start_cursor_x_ = static_cast<double>(window_x) + cursor_x;
-            drag_start_cursor_y_ = static_cast<double>(window_y) + cursor_y;
+            interaction_.mode = WindowInteractionMode::Dragging;
+            interaction_.drag_start_window_x = window_x;
+            interaction_.drag_start_window_y = window_y;
+            interaction_.drag_start_cursor_x = static_cast<double>(window_x) + cursor_x;
+            interaction_.drag_start_cursor_y = static_cast<double>(window_y) + cursor_y;
         }
     }
 
     if (!left_mouse_is_down) {
-        dragging_title_bar_ = false;
-        resizing_ = false;
-        resize_edges_ = 0;
-    } else if (resizing_) {
+        interaction_.mode = WindowInteractionMode::Idle;
+        interaction_.resize_edges = 0;
+    } else if (interaction_.mode == WindowInteractionMode::Resizing) {
         const double cursor_screen_x = static_cast<double>(window_x) + cursor_x;
         const double cursor_screen_y = static_cast<double>(window_y) + cursor_y;
-        const int delta_x = static_cast<int>(cursor_screen_x - drag_start_cursor_x_);
-        const int delta_y = static_cast<int>(cursor_screen_y - drag_start_cursor_y_);
+        const int delta_x = static_cast<int>(
+            cursor_screen_x - interaction_.drag_start_cursor_x);
+        const int delta_y = static_cast<int>(
+            cursor_screen_y - interaction_.drag_start_cursor_y);
 
-        int width = resize_start_width_;
-        int height = resize_start_height_;
-        int x = drag_start_window_x_;
-        int y = drag_start_window_y_;
-        if ((resize_edges_ & kResizeRight) != 0) width += delta_x;
-        if ((resize_edges_ & kResizeLeft) != 0) {
+        int width = interaction_.resize_start_width;
+        int height = interaction_.resize_start_height;
+        int x = interaction_.drag_start_window_x;
+        int y = interaction_.drag_start_window_y;
+        if ((interaction_.resize_edges & kResizeRight) != 0) width += delta_x;
+        if ((interaction_.resize_edges & kResizeLeft) != 0) {
             width -= delta_x;
             x += delta_x;
         }
-        if ((resize_edges_ & kResizeBottom) != 0) height += delta_y;
-        if ((resize_edges_ & kResizeTop) != 0) {
+        if ((interaction_.resize_edges & kResizeBottom) != 0) height += delta_y;
+        if ((interaction_.resize_edges & kResizeTop) != 0) {
             height -= delta_y;
             y += delta_y;
         }
 
         const int minimum_width = static_cast<int>(
-            std::lround(320.0f * GetWindowScaleX(window_)));
+            std::lround(320.0f * GetWindowScaleX(handle_)));
         const int minimum_height = static_cast<int>(
-            std::lround(200.0f * GetWindowScaleY(window_)));
+            std::lround(200.0f * GetWindowScaleY(handle_)));
         if (width < minimum_width) {
-            if ((resize_edges_ & kResizeLeft) != 0) {
+            if ((interaction_.resize_edges & kResizeLeft) != 0) {
                 x -= minimum_width - width;
             }
             width = minimum_width;
         }
         if (height < minimum_height) {
-            if ((resize_edges_ & kResizeTop) != 0) {
+            if ((interaction_.resize_edges & kResizeTop) != 0) {
                 y -= minimum_height - height;
             }
             height = minimum_height;
         }
-        glfwSetWindowPos(window_, x, y);
-        glfwSetWindowSize(window_, width, height);
-    } else if (dragging_title_bar_) {
+        glfwSetWindowPos(handle_, x, y);
+        glfwSetWindowSize(handle_, width, height);
+    } else if (interaction_.mode == WindowInteractionMode::Dragging) {
         const double cursor_screen_x = static_cast<double>(window_x) + cursor_x;
         const double cursor_screen_y = static_cast<double>(window_y) + cursor_y;
         glfwSetWindowPos(
-            window_,
-            drag_start_window_x_ + static_cast<int>(cursor_screen_x - drag_start_cursor_x_),
-            drag_start_window_y_ + static_cast<int>(cursor_screen_y - drag_start_cursor_y_)
+            handle_,
+            interaction_.drag_start_window_x
+                + static_cast<int>(cursor_screen_x - interaction_.drag_start_cursor_x),
+            interaction_.drag_start_window_y
+                + static_cast<int>(cursor_screen_y - interaction_.drag_start_cursor_y)
         );
     }
 
-    left_mouse_was_down_ = left_mouse_is_down;
+    interaction_.left_mouse_down = left_mouse_is_down;
 }
 
 bool Window::ShouldClose() const
 {
-    return glfwWindowShouldClose(window_);
+    return glfwWindowShouldClose(handle_);
+}
+
+WindowStatus Window::GetStatus() const
+{
+    WindowStatus status = status_;
+    status.focused = glfwGetWindowAttrib(handle_, GLFW_FOCUSED) == GLFW_TRUE;
+    status.minimized = glfwGetWindowAttrib(handle_, GLFW_ICONIFIED) == GLFW_TRUE;
+    status.maximized = glfwGetWindowAttrib(handle_, GLFW_MAXIMIZED) == GLFW_TRUE;
+    status.visible = glfwGetWindowAttrib(handle_, GLFW_VISIBLE) == GLFW_TRUE;
+    status.should_close = glfwWindowShouldClose(handle_) == GLFW_TRUE;
+    return status;
+}
+
+WindowMetrics Window::GetMetrics() const
+{
+    WindowMetrics metrics = metrics_;
+    glfwGetWindowSize(handle_, &metrics.logical_width, &metrics.logical_height);
+    glfwGetFramebufferSize(handle_, &metrics.framebuffer_width,
+                           &metrics.framebuffer_height);
+    glfwGetWindowContentScale(handle_, &metrics.content_scale_x,
+                              &metrics.content_scale_y);
+    return metrics;
 }
 
 Window::Window(Window&& other) noexcept
-    : window_(std::exchange(other.window_, nullptr))
-    , horizontal_resize_cursor_(std::exchange(other.horizontal_resize_cursor_, nullptr))
-    , vertical_resize_cursor_(std::exchange(other.vertical_resize_cursor_, nullptr))
-    , diagonal_resize_cursor_(std::exchange(other.diagonal_resize_cursor_, nullptr))
-    , anti_diagonal_resize_cursor_(
-          std::exchange(other.anti_diagonal_resize_cursor_, nullptr))
-    , width_(other.width_)
-    , height_(other.height_)
+    : handle_(std::exchange(other.handle_, nullptr))
+    , status_(other.status_)
+    , metrics_(other.metrics_)
+    , interaction_(other.interaction_)
 {
-    if (window_ != nullptr) {
-        glfwSetWindowUserPointer(window_, this);
+    if (handle_ != nullptr) {
+        glfwSetWindowUserPointer(handle_, this);
     }
 }
 
@@ -232,28 +247,17 @@ Window& Window::operator=(Window&& other) noexcept
         return *this;
     }
 
-    if (window_ != nullptr) {
-        if (horizontal_resize_cursor_ != nullptr) glfwDestroyCursor(horizontal_resize_cursor_);
-        if (vertical_resize_cursor_ != nullptr) glfwDestroyCursor(vertical_resize_cursor_);
-        if (diagonal_resize_cursor_ != nullptr) glfwDestroyCursor(diagonal_resize_cursor_);
-        if (anti_diagonal_resize_cursor_ != nullptr) glfwDestroyCursor(anti_diagonal_resize_cursor_);
-        glfwDestroyWindow(window_);
+    if (handle_ != nullptr) {
+        glfwDestroyWindow(handle_);
     }
 
-    window_ = std::exchange(other.window_, nullptr);
-    horizontal_resize_cursor_ =
-        std::exchange(other.horizontal_resize_cursor_, nullptr);
-    vertical_resize_cursor_ =
-        std::exchange(other.vertical_resize_cursor_, nullptr);
-    diagonal_resize_cursor_ =
-        std::exchange(other.diagonal_resize_cursor_, nullptr);
-    anti_diagonal_resize_cursor_ =
-        std::exchange(other.anti_diagonal_resize_cursor_, nullptr);
-    width_ = other.width_;
-    height_ = other.height_;
+    handle_ = std::exchange(other.handle_, nullptr);
+    status_ = other.status_;
+    metrics_ = other.metrics_;
+    interaction_ = other.interaction_;
 
-    if (window_ != nullptr) {
-        glfwSetWindowUserPointer(window_, this);
+    if (handle_ != nullptr) {
+        glfwSetWindowUserPointer(handle_, this);
     }
 
     return *this;
@@ -261,19 +265,19 @@ Window& Window::operator=(Window&& other) noexcept
 
 int Window::GetWidth() const
 {
-    return width_;
+    return metrics_.framebuffer_width;
 }
 
 int Window::GetHeight() const
 {
-    return height_;
+    return metrics_.framebuffer_height;
 }
 
 int Window::GetLogicalWidth() const
 {
     int width = 0;
     int height = 0;
-    glfwGetWindowSize(window_, &width, &height);
+    glfwGetWindowSize(handle_, &width, &height);
     return width;
 }
 
@@ -281,7 +285,7 @@ int Window::GetLogicalHeight() const
 {
     int width = 0;
     int height = 0;
-    glfwGetWindowSize(window_, &width, &height);
+    glfwGetWindowSize(handle_, &width, &height);
     return height;
 }
 
@@ -289,14 +293,14 @@ int Window::GetTitleBarHeight() const
 {
     constexpr float kDesignTitleBarHeight = 32.0f;
     return static_cast<int>(std::lround(
-        kDesignTitleBarHeight * GetWindowScaleY(window_)));
+        kDesignTitleBarHeight * GetWindowScaleY(handle_)));
 }
 
 int Window::GetTitleBarControlWidth() const
 {
     constexpr float kDesignTitleBarControlWidth = 48.0f;
     return static_cast<int>(std::lround(
-        kDesignTitleBarControlWidth * GetWindowScaleX(window_)));
+        kDesignTitleBarControlWidth * GetWindowScaleX(handle_)));
 }
 
 void Window::RenderTitleBar(Renderer& renderer, const Style& style) const
@@ -329,7 +333,7 @@ void Window::RenderTitleBar(Renderer& renderer, const Style& style) const
     const float minimize_left = window_width - control_width * 3.0f;
     double cursor_x = 0.0;
     double cursor_y = 0.0;
-    glfwGetCursorPos(window_, &cursor_x, &cursor_y);
+    glfwGetCursorPos(handle_, &cursor_x, &cursor_y);
     const bool pointer_in_title_bar = cursor_y >= 0.0
         && cursor_y < title_bar_height;
     const bool minimize_hovered = pointer_in_title_bar
