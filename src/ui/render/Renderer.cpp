@@ -9,8 +9,6 @@
 
 #include <stdexcept>
 #include <utility>
-#include <vector>
-#include <string>
 #include <glad/gl.h>
 
 #include <self/ui/render/Renderer.hpp>
@@ -43,10 +41,10 @@ std::expected<Renderer, WindowError> Renderer::Create(
 Renderer::Renderer(Renderer&& other) noexcept
     : style_(std::move(other.style_)),
       icon_manager_(std::move(other.icon_manager_)),
+      icon_renderer_(std::move(other.icon_renderer_)),
       program_(std::exchange(other.program_, 0)),
       vao_(std::exchange(other.vao_, 0)),
-      vbo_(std::exchange(other.vbo_, 0)),
-      icon_textures_(std::move(other.icon_textures_))
+      vbo_(std::exchange(other.vbo_, 0))
 {}
 
 Renderer& Renderer::operator=(Renderer&& other) noexcept
@@ -55,12 +53,9 @@ Renderer& Renderer::operator=(Renderer&& other) noexcept
         return *this;
     }
 
-    for (const auto& [name, texture] : icon_textures_) {
-        glDeleteTextures(1, &texture);
-    }
-
     style_ = std::move(other.style_);
     icon_manager_ = std::move(other.icon_manager_);
+    icon_renderer_ = std::move(other.icon_renderer_);
 
     if (vbo_ != 0) {
         glDeleteBuffers(1, &vbo_);
@@ -77,7 +72,6 @@ Renderer& Renderer::operator=(Renderer&& other) noexcept
     program_ = std::exchange(other.program_, 0);
     vao_ = std::exchange(other.vao_, 0);
     vbo_ = std::exchange(other.vbo_, 0);
-    icon_textures_ = std::move(other.icon_textures_);
 
     return *this;
 }
@@ -138,9 +132,6 @@ namespace
 
 Renderer::~Renderer()
 {
-    for (const auto& [name, texture] : icon_textures_) {
-        glDeleteTextures(1, &texture);
-    }
     if (vbo_ != 0) {
         glDeleteBuffers(1, &vbo_);
     }
@@ -265,59 +256,12 @@ void Renderer::RenderPolygon(const Window& window, const PointSet& points,
     glUseProgram(0);
 }
 
-void Renderer::RenderIcon(const Window& window, const std::string_view name, const float x,
-                          const float y, const float width, const float height,
-                          const Color& color)
+void Renderer::RenderIcon(const Window& window, const std::string_view name,
+                          const float x, const float y, const float width,
+                          const float height, const Color& color)
 {
-    const std::string key{name};
-    auto cached_texture = icon_textures_.find(key);
-    if (cached_texture == icon_textures_.end()) {
-        auto icon = icon_manager_.GetIcon(name);
-        if (!icon) return;
-
-        unsigned int texture = 0;
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, icon->width, icon->height,
-                     0, GL_RGBA, GL_UNSIGNED_BYTE, icon->rgba.data());
-        glBindTexture(GL_TEXTURE_2D, 0);
-        cached_texture = icon_textures_.emplace(key, texture).first;
-    }
-
-    const float logical_width = static_cast<float>(window.GetLogicalWidth());
-    const float logical_height = static_cast<float>(window.GetLogicalHeight());
-    if (logical_width <= 0.0f || logical_height <= 0.0f) return;
-    const float left = x / logical_width * 2.0f - 1.0f;
-    const float right = (x + width) / logical_width * 2.0f - 1.0f;
-    const float top = 1.0f - y / logical_height * 2.0f;
-    const float bottom = 1.0f - (y + height) / logical_height * 2.0f;
-    const std::vector<float> vertices{
-        left, top, 0.0f, 1.0f, right, top, 1.0f, 1.0f,
-        right, bottom, 1.0f, 0.0f, left, top, 0.0f, 1.0f,
-        right, bottom, 1.0f, 0.0f, left, bottom, 0.0f, 0.0f,
-    };
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glUseProgram(program_);
-    glUniform4f(glGetUniformLocation(program_, "u_color"),
-                color.r, color.g, color.b, color.a);
-    glUniform1i(glGetUniformLocation(program_, "u_use_texture"), 1);
-    glUniform1i(glGetUniformLocation(program_, "u_texture"), 0);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, cached_texture->second);
-    glBindVertexArray(vao_);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_);
-    glBufferData(GL_ARRAY_BUFFER,
-                 static_cast<GLsizeiptr>(vertices.size() * sizeof(float)),
-                 vertices.data(), GL_STREAM_DRAW);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glUseProgram(0);
-    glDisable(GL_BLEND);
+    icon_renderer_.Render(window, icon_manager_, program_, vao_, vbo_,
+                          name, x, y, width, height, color);
 }
 
 const Style& Renderer::GetStyle() const noexcept

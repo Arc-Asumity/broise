@@ -10,15 +10,14 @@
 #pragma once
 
 #include <expected>
-#include <string>
 #include <string_view>
-#include <unordered_map>
 
 #include <self/ui/window/Window.hpp>
 #include <self/ui/Base.hpp>
 #include <self/ui/Style.hpp>
 #include <self/core/IconManager.hpp>
 #include <self/core/WindowManager.hpp>
+#include <self/ui/render/IconRenderer.hpp>
 
 
 class Renderer
@@ -49,11 +48,11 @@ private:
 
     Style style_;
     IconManager icon_manager_;
+    IconRenderer icon_renderer_;
 
     unsigned int program_{};
     unsigned int vao_{};
     unsigned int vbo_{};
-    std::unordered_map<std::string, unsigned int> icon_textures_;
 
     Renderer(Style style,
              std::filesystem::path icon_directory);
