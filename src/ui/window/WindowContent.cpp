@@ -72,7 +72,7 @@ void WindowContent::Render(
                         minimize_left + (control_width - icon_size_big) * 0.5f,
                         center_y - icon_size_big * 0.5f,
                         icon_size_big, icon_size_big, style.colors.text);
-    renderer.RenderIcon("square",
+    renderer.RenderIcon(window.GetStatus().maximized ? "copy" : "square",
                         maximize_left + (control_width - icon_size_small) * 0.5f,
                         center_y - icon_size_small * 0.5f,
                         icon_size_small, icon_size_small, style.colors.text);
