@@ -12,7 +12,6 @@
 #include <vector>
 #include <string>
 #include <glad/gl.h>
-#include <lunasvg.h>
 
 #include <self/core/Renderer.hpp>
 #include <self/ui/Font.hpp>
@@ -31,19 +30,12 @@ std::expected<Renderer, WindowError> Renderer::Create(
     Renderer renderer(window, std::move(style),
                       std::move(icon_directory));
     if (auto icon = renderer.icon_manager_.GetIcon("broise")) {
-        auto document = lunasvg::Document::loadFromData(icon->svg);
-        if (document) {
-            auto bitmap = document->renderToBitmap(64, 64);
-            if (!bitmap.isNull()) {
-                bitmap.convertToRGBA();
-                const GLFWimage window_icon{
-                    .width = bitmap.width(),
-                    .height = bitmap.height(),
-                    .pixels = bitmap.data(),
-                };
-                window_manager.SetIcon(window, window_icon);
-            }
-        }
+        const GLFWimage window_icon{
+            .width = icon->width,
+            .height = icon->height,
+            .pixels = icon->rgba.data(),
+        };
+        window_manager.SetIcon(window, window_icon);
     }
     renderer.Init();
     return renderer;
@@ -284,26 +276,13 @@ void Renderer::RenderIcon(const std::string_view name, const float x,
         auto icon = icon_manager_.GetIcon(name);
         if (!icon) return;
 
-        std::string svg = icon->svg;
-        std::string::size_type position = 0;
-        while ((position = svg.find("currentColor", position))
-               != std::string::npos) {
-            svg.replace(position, 12, "#ffffff");
-            position += 7;
-        }
-        auto document = lunasvg::Document::loadFromData(svg);
-        if (!document) return;
-        auto bitmap = document->renderToBitmap(64, 64);
-        if (bitmap.isNull()) return;
-        bitmap.convertToRGBA();
-
         unsigned int texture = 0;
         glGenTextures(1, &texture);
         glBindTexture(GL_TEXTURE_2D, texture);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, bitmap.width(), bitmap.height(),
-                     0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap.data());
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, icon->width, icon->height,
+                     0, GL_RGBA, GL_UNSIGNED_BYTE, icon->rgba.data());
         glBindTexture(GL_TEXTURE_2D, 0);
         cached_texture = icon_textures_.emplace(key, texture).first;
     }

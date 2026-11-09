@@ -11,6 +11,8 @@
 #include <string>
 #include <utility>
 
+#include <lunasvg.h>
+
 #include <self/core/IconManager.hpp>
 
 namespace
@@ -43,7 +45,30 @@ std::expected<Icon, std::string> IconManager::GetIcon(
         return std::unexpected(svg.error());
     }
 
-    return icon_cache_.emplace(key, Icon{std::move(*svg)}).first->second;
+    std::string data = std::move(*svg);
+    std::string::size_type position = 0;
+    while ((position = data.find("currentColor", position))
+           != std::string::npos) {
+        data.replace(position, 12, "#ffffff");
+        position += 7;
+    }
+
+    auto document = lunasvg::Document::loadFromData(data);
+    if (!document) {
+        return std::unexpected("Failed to parse SVG icon: " + key);
+    }
+    auto bitmap = document->renderToBitmap(64, 64);
+    if (bitmap.isNull()) {
+        return std::unexpected("Failed to rasterize SVG icon: " + key);
+    }
+    bitmap.convertToRGBA();
+
+    Icon icon;
+    icon.width = bitmap.width();
+    icon.height = bitmap.height();
+    const auto* pixels = bitmap.data();
+    icon.rgba.assign(pixels, pixels + icon.width * icon.height * 4);
+    return icon_cache_.emplace(key, std::move(icon)).first->second;
 }
 
 IconManager::IconManager(std::filesystem::path icon_directory)

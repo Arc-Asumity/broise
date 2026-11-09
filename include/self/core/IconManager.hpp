@@ -13,11 +13,14 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <vector>
 
 
 struct Icon
 {
-    std::string svg;
+    int width{};
+    int height{};
+    std::vector<unsigned char> rgba;
 };
 
 class IconManager
