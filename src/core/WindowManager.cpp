@@ -144,6 +144,21 @@ void WindowManager::UpdateWindowInput()
     }
 }
 
+bool WindowManager::ShouldClose(const Window& window) const
+{
+    return glfwWindowShouldClose(window.handle_) == GLFW_TRUE;
+}
+
+void WindowManager::SwapBuffers(const Window& window) const
+{
+    glfwSwapBuffers(window.handle_);
+}
+
+void WindowManager::SetIcon(Window& window, const GLFWimage& icon) const
+{
+    glfwSetWindowIcon(window.handle_, 1, &icon);
+}
+
 void WindowManager::Shutdown() noexcept
 {
     windows_.clear();

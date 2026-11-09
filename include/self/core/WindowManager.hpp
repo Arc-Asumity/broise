@@ -33,6 +33,9 @@ public:
     void DestroyWindow(Window& window);
     void PollEvents() const;
     void UpdateWindowInput();
+    [[nodiscard]] bool ShouldClose(const Window& window) const;
+    void SwapBuffers(const Window& window) const;
+    void SetIcon(Window& window, const GLFWimage& icon) const;
 
 private:
     void Shutdown() noexcept;

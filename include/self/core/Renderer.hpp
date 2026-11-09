@@ -18,13 +18,14 @@
 #include <self/ui/Base.hpp>
 #include <self/ui/Style.hpp>
 #include <self/core/IconManager.hpp>
+#include <self/core/WindowManager.hpp>
 
 
 class Renderer
 {
 public:
     [[nodiscard]] static std::expected<Renderer, WindowError>
-    Create(Window& window, Style style,
+    Create(Window& window, WindowManager& window_manager, Style style,
            std::filesystem::path icon_directory);
 
     ~Renderer();
@@ -39,8 +40,6 @@ public:
     void RenderPolygon(const PointSet& points, const Color& color) const;
     void RenderIcon(std::string_view name, float x, float y,
                     float width, float height, const Color& color);
-    [[nodiscard]] bool ShouldClose() const;
-    void SwapBuffers() const;
     [[nodiscard]] const Window& GetWindow() const noexcept;
     [[nodiscard]] const Style& GetStyle() const noexcept;
     [[nodiscard]] IconManager& GetIconManager() noexcept;

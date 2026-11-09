@@ -41,16 +41,6 @@ Window::~Window()
     }
 }
 
-void Window::SwapBuffers() const
-{
-    glfwSwapBuffers(handle_);
-}
-
-void Window::SetIcon(const GLFWimage& icon) const
-{
-    glfwSetWindowIcon(handle_, 1, &icon);
-}
-
 void Window::RenderContent(Renderer& renderer, const Style& style) const
 {
     content_.Render(*this, renderer, style);
@@ -59,11 +49,6 @@ void Window::RenderContent(Renderer& renderer, const Style& style) const
 void Window::UpdateTitleBarInput(CursorManager& cursor_manager)
 {
     content_.UpdateTitleBarInput(*this, cursor_manager);
-}
-
-bool Window::ShouldClose() const
-{
-    return glfwWindowShouldClose(handle_);
 }
 
 WindowStatus Window::GetStatus() const

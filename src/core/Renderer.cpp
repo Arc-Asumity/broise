@@ -25,7 +25,8 @@ Renderer::Renderer(Window& window, Style style,
 {}
 
 std::expected<Renderer, WindowError> Renderer::Create(
-    Window& window, Style style, std::filesystem::path icon_directory)
+    Window& window, WindowManager& window_manager, Style style,
+    std::filesystem::path icon_directory)
 {
     Renderer renderer(window, std::move(style),
                       std::move(icon_directory));
@@ -40,7 +41,7 @@ std::expected<Renderer, WindowError> Renderer::Create(
                     .height = bitmap.height(),
                     .pixels = bitmap.data(),
                 };
-                renderer.window_->SetIcon(window_icon);
+                window_manager.SetIcon(window, window_icon);
             }
         }
     }
@@ -339,16 +340,6 @@ void Renderer::RenderIcon(const std::string_view name, const float x,
     glBindTexture(GL_TEXTURE_2D, 0);
     glUseProgram(0);
     glDisable(GL_BLEND);
-}
-
-bool Renderer::ShouldClose() const
-{
-    return window_->ShouldClose();
-}
-
-void Renderer::SwapBuffers() const
-{
-    window_->SwapBuffers();
 }
 
 const Window& Renderer::GetWindow() const noexcept

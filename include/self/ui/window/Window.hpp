@@ -40,13 +40,8 @@ class Window {
 public:
     ~Window();
 
-    void SwapBuffers() const;
-    void SetIcon(const GLFWimage& icon) const;
     void UpdateTitleBarInput(CursorManager& cursor_manager);
     void RenderContent(Renderer& renderer, const Style& style) const;
-
-    [[nodiscard]]
-    bool ShouldClose() const;
     [[nodiscard]] WindowStatus GetStatus() const;
     [[nodiscard]] WindowMetrics GetMetrics() const;
 
