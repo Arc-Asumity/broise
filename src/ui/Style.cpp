@@ -35,7 +35,7 @@ namespace
         return Color{channels[0], channels[1], channels[2], channels[3]};
     }
 
-    std::expected<FontStyle, std::string> readFont(
+    std::expected<Font, std::string> readFont(
         const toml::table& fonts, const std::string& name)
     {
         const auto* font = fonts.get_as<toml::table>(name);
@@ -49,7 +49,7 @@ namespace
             return std::unexpected("Font style '" + name + "' needs a file and positive size");
         }
 
-        return FontStyle{.file = std::filesystem::path{*file}, .size = static_cast<float>(*size)};
+        return Font{.file = std::filesystem::path{*file}, .size = static_cast<float>(*size)};
     }
 }
 
@@ -96,7 +96,7 @@ Style::Load(const std::filesystem::path& path)
     };
     const std::filesystem::path install_directory =
         path.parent_path().parent_path();
-    const auto resolve_font_path = [&install_directory](FontStyle& font) {
+    const auto resolve_font_path = [&install_directory](Font& font) {
         if (font.file.is_relative()) {
             font.file = install_directory / font.file;
         }

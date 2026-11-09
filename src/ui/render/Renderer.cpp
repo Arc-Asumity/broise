@@ -12,7 +12,6 @@
 #include <glad/gl.h>
 
 #include <self/ui/render/Renderer.hpp>
-#include <self/ui/Font.hpp>
 
 Renderer::Renderer(Style style,
                    std::filesystem::path icon_directory)

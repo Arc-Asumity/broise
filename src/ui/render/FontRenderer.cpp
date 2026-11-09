@@ -3,7 +3,7 @@
 // Licensed under the GPLv3 or later.
 // https://github.com/Arc-Asumity/broise
 // ==============================================================
-// Path /src/ui/Font.cpp
+// Path /src/ui/render/FontRenderer.cpp
 // Font renderer.
 
 
@@ -17,7 +17,7 @@
 
 #include <glad/gl.h>
 
-#include <self/ui/Font.hpp>
+#include <self/ui/render/FontRenderer.hpp>
 
 namespace
 {
@@ -108,7 +108,7 @@ FontRenderer::~FontRenderer()
     if (library_ != nullptr) FT_Done_FreeType(library_);
 }
 
-FontRenderer::FaceData& FontRenderer::GetFace(const FontStyle& font)
+FontRenderer::FaceData& FontRenderer::GetFace(const Font& font)
 {
     const std::string path = font.file.string();
     auto [iterator, inserted] = faces_.try_emplace(path);
@@ -170,7 +170,7 @@ FontRenderer::Glyph& FontRenderer::GetGlyph(
 }
 
 void FontRenderer::Render(
-    const std::string_view text, const FontStyle& font,
+    const std::string_view text, const Font& font,
     const float x, const float y, const float width, const float height,
     const Color& color)
 {

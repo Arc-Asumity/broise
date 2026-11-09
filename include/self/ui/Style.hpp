@@ -15,12 +15,7 @@
 #include <unordered_map>
 
 #include <self/ui/Base.hpp>
-
-struct FontStyle
-{
-    std::filesystem::path file;
-    float size{};
-};
+#include <self/ui/Font.hpp>
 
 struct StyleColors
 {
@@ -34,7 +29,7 @@ struct StyleColors
 struct Style
 {
     StyleColors colors;
-    std::unordered_map<std::string, FontStyle> fonts;
+    std::unordered_map<std::string, Font> fonts;
 
     [[nodiscard]] static std::expected<Style, std::string>
     Load(const std::filesystem::path& path);

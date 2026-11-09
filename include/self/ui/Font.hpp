@@ -4,58 +4,14 @@
 // https://github.com/Arc-Asumity/broise
 // ==============================================================
 // Path /include/self/ui/Font.hpp
-// Header file for font renderer.
-
+// Font asset metadata.
 
 #pragma once
 
-#include <string>
-#include <string_view>
-#include <unordered_map>
+#include <filesystem>
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-
-#include <self/ui/Base.hpp>
-#include <self/ui/Style.hpp>
-
-class FontRenderer
+struct Font
 {
-public:
-    FontRenderer();
-    ~FontRenderer();
-
-    FontRenderer(const FontRenderer&) = delete;
-    FontRenderer& operator=(const FontRenderer&) = delete;
-
-    void Render(std::string_view text, const FontStyle& font,
-                float x, float y, float width, float height,
-                const Color& color);
-
-private:
-    struct FaceData
-    {
-        FT_Face face{};
-        unsigned int pixel_size{};
-    };
-
-    struct Glyph
-    {
-        unsigned int texture{};
-        int width{};
-        int height{};
-        int bearing_x{};
-        int bearing_y{};
-        unsigned int advance{};
-    };
-
-    FT_Library library_{};
-    unsigned int program_{};
-    unsigned int vao_{};
-    unsigned int vbo_{};
-    std::unordered_map<std::string, FaceData> faces_;
-    std::unordered_map<std::string, Glyph> glyphs_;
-
-    FaceData& GetFace(const FontStyle& font);
-    Glyph& GetGlyph(const std::string& key, FaceData& face, unsigned int codepoint);
+    std::filesystem::path file;
+    float size{};
 };

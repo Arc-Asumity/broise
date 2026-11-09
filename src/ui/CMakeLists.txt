@@ -1,5 +1,4 @@
 add_library(Broise_UI
-    Font.cpp
     Rect.cpp
     Style.cpp
 )
