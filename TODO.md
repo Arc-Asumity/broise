@@ -1,6 +1,6 @@
 ## Features
 
-- [ ] Split the Window
+- [x] Split the Window
 - [ ] Split the Renderer
 - [ ] Add the OpenGPG Signature verification of Module
 - [ ] Add the IConfigFile
