@@ -38,6 +38,6 @@ private:
     void Shutdown() noexcept;
 
     std::vector<Window> windows_;
-    CursorManager cursor_manager_;
+    CursorManager cursor_;
     bool glfw_initialized_{};
 };

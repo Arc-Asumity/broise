@@ -19,12 +19,15 @@ class Renderer {
 
 class WindowManager {
     - vector~Window~ windows_
+    - CursorManager cursor_
     + Initialize()
     + CreateWindow(config: WindowConfig) Window*
     + DestroyWindow(window: Window)
     + PollEvents()
     + Shutdown()
 }
+
+class CursorManager
 
 class WindowConfig {
     + string title
@@ -81,8 +84,6 @@ class WindowInteractionMode {
     Resizing
 }
 
-class CursorManager
-
 class Style
 
 class ModuleLoader {
@@ -125,8 +126,8 @@ Application *-- WindowManager : owns
 Application *-- Renderer : owns
 
 WindowManager *-- Window : owns
+    WindowManager *-- CursorManager : owns
 WindowManager ..> WindowConfig : uses
-WindowManager *-- CursorManager : owns
 
 Window *-- WindowStatus : owns
 Window *-- WindowMetrics : owns

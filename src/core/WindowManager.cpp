@@ -21,7 +21,7 @@ WindowManager::~WindowManager()
 
 WindowManager::WindowManager(WindowManager&& other) noexcept
     : windows_(std::move(other.windows_))
-    , cursor_manager_(std::move(other.cursor_manager_))
+    , cursor_(std::move(other.cursor_))
     , glfw_initialized_(std::exchange(other.glfw_initialized_, false))
 {}
 
@@ -38,7 +38,7 @@ WindowManager& WindowManager::operator=(WindowManager&& other) noexcept
         glfw_initialized_ = false;
     }
     windows_ = std::move(other.windows_);
-    cursor_manager_ = std::move(other.cursor_manager_);
+    cursor_ = std::move(other.cursor_);
     glfw_initialized_ = glfw_initialized_
         || std::exchange(other.glfw_initialized_, false);
     return *this;
@@ -113,7 +113,7 @@ std::expected<void, WindowError> WindowManager::InitGlfw()
     glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-    if (!cursor_manager_.Initialize()) {
+    if (!cursor_.Initialize()) {
         return std::unexpected(WindowError::WindowCreationFailed);
     }
     return {};
@@ -140,7 +140,7 @@ void WindowManager::PollEvents() const
 void WindowManager::UpdateWindowInput()
 {
     for (auto& window : windows_) {
-        window.UpdateTitleBarInput(cursor_manager_);
+        window.UpdateTitleBarInput(cursor_);
     }
 }
 
@@ -148,7 +148,7 @@ void WindowManager::Shutdown() noexcept
 {
     windows_.clear();
     if (glfw_initialized_) {
-        cursor_manager_.Shutdown();
+        cursor_.Shutdown();
         glfwTerminate();
         glfw_initialized_ = false;
     }
