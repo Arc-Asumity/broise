@@ -13,6 +13,7 @@
 #include <vector>
 
 #include <self/ui/window/Window.hpp>
+#include <self/ui/window/CursorManager.hpp>
 
 class WindowManager
 {
@@ -37,9 +38,6 @@ private:
     void Shutdown() noexcept;
 
     std::vector<Window> windows_;
-    GLFWcursor* horizontal_resize_cursor_{};
-    GLFWcursor* vertical_resize_cursor_{};
-    GLFWcursor* diagonal_resize_cursor_{};
-    GLFWcursor* anti_diagonal_resize_cursor_{};
+    CursorManager cursor_manager_;
     bool glfw_initialized_{};
 };

@@ -56,10 +56,7 @@ void Window::SetIcon(const GLFWimage& icon) const
 }
 
 void Window::UpdateTitleBarInput(
-    GLFWcursor* horizontal_resize_cursor,
-    GLFWcursor* vertical_resize_cursor,
-    GLFWcursor* diagonal_resize_cursor,
-    GLFWcursor* anti_diagonal_resize_cursor)
+    CursorManager& cursor_manager)
 {
     const bool left_mouse_is_down =
         glfwGetMouseButton(handle_, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
@@ -92,20 +89,7 @@ void Window::UpdateTitleBarInput(
         if (cursor_y < resize_border_y) hovered_edges |= kResizeTop;
         if (cursor_y >= window_height - resize_border_y) hovered_edges |= kResizeBottom;
     }
-    GLFWcursor* cursor = nullptr;
-    if ((hovered_edges & (kResizeLeft | kResizeRight)) != 0
-        && (hovered_edges & (kResizeTop | kResizeBottom)) != 0) {
-        const bool same_diagonal =
-            ((hovered_edges & kResizeLeft) != 0)
-                == ((hovered_edges & kResizeTop) != 0);
-        cursor = same_diagonal ? diagonal_resize_cursor
-                               : anti_diagonal_resize_cursor;
-    } else if ((hovered_edges & (kResizeLeft | kResizeRight)) != 0) {
-        cursor = horizontal_resize_cursor;
-    } else if ((hovered_edges & (kResizeTop | kResizeBottom)) != 0) {
-        cursor = vertical_resize_cursor;
-    }
-    glfwSetCursor(handle_, cursor);
+    cursor_manager.Apply(handle_, hovered_edges);
 
     if (left_mouse_is_down && !interaction_.left_mouse_down) {
         interaction_.resize_edges = hovered_edges;

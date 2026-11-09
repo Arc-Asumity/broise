@@ -15,6 +15,7 @@
 #include <GLFW/glfw3.h>
 
 #include <self/ui/Base.hpp>
+#include <self/ui/window/CursorManager.hpp>
 #include <self/ui/window/WindowInteraction.hpp>
 #include <self/ui/window/WindowMetrics.hpp>
 #include <self/ui/window/WindowStatus.hpp>
@@ -39,10 +40,7 @@ public:
 
     void SwapBuffers() const;
     void SetIcon(const GLFWimage& icon) const;
-    void UpdateTitleBarInput(GLFWcursor* horizontal_resize_cursor,
-                             GLFWcursor* vertical_resize_cursor,
-                             GLFWcursor* diagonal_resize_cursor,
-                             GLFWcursor* anti_diagonal_resize_cursor);
+    void UpdateTitleBarInput(CursorManager& cursor_manager);
     void RenderTitleBar(Renderer& renderer, const Style& style) const;
 
     [[nodiscard]]

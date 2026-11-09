@@ -21,14 +21,7 @@ WindowManager::~WindowManager()
 
 WindowManager::WindowManager(WindowManager&& other) noexcept
     : windows_(std::move(other.windows_))
-    , horizontal_resize_cursor_(
-          std::exchange(other.horizontal_resize_cursor_, nullptr))
-    , vertical_resize_cursor_(
-          std::exchange(other.vertical_resize_cursor_, nullptr))
-    , diagonal_resize_cursor_(
-          std::exchange(other.diagonal_resize_cursor_, nullptr))
-    , anti_diagonal_resize_cursor_(
-          std::exchange(other.anti_diagonal_resize_cursor_, nullptr))
+    , cursor_manager_(std::move(other.cursor_manager_))
     , glfw_initialized_(std::exchange(other.glfw_initialized_, false))
 {}
 
@@ -45,14 +38,7 @@ WindowManager& WindowManager::operator=(WindowManager&& other) noexcept
         glfw_initialized_ = false;
     }
     windows_ = std::move(other.windows_);
-    horizontal_resize_cursor_ =
-        std::exchange(other.horizontal_resize_cursor_, nullptr);
-    vertical_resize_cursor_ =
-        std::exchange(other.vertical_resize_cursor_, nullptr);
-    diagonal_resize_cursor_ =
-        std::exchange(other.diagonal_resize_cursor_, nullptr);
-    anti_diagonal_resize_cursor_ =
-        std::exchange(other.anti_diagonal_resize_cursor_, nullptr);
+    cursor_manager_ = std::move(other.cursor_manager_);
     glfw_initialized_ = glfw_initialized_
         || std::exchange(other.glfw_initialized_, false);
     return *this;
@@ -127,10 +113,9 @@ std::expected<void, WindowError> WindowManager::InitGlfw()
     glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-    horizontal_resize_cursor_ = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
-    vertical_resize_cursor_ = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
-    diagonal_resize_cursor_ = glfwCreateStandardCursor(GLFW_RESIZE_NWSE_CURSOR);
-    anti_diagonal_resize_cursor_ = glfwCreateStandardCursor(GLFW_RESIZE_NESW_CURSOR);
+    if (!cursor_manager_.Initialize()) {
+        return std::unexpected(WindowError::WindowCreationFailed);
+    }
     return {};
 }
 
@@ -155,9 +140,7 @@ void WindowManager::PollEvents() const
 void WindowManager::UpdateWindowInput()
 {
     for (auto& window : windows_) {
-        window.UpdateTitleBarInput(
-            horizontal_resize_cursor_, vertical_resize_cursor_,
-            diagonal_resize_cursor_, anti_diagonal_resize_cursor_);
+        window.UpdateTitleBarInput(cursor_manager_);
     }
 }
 
@@ -165,18 +148,7 @@ void WindowManager::Shutdown() noexcept
 {
     windows_.clear();
     if (glfw_initialized_) {
-        if (horizontal_resize_cursor_ != nullptr) {
-            glfwDestroyCursor(horizontal_resize_cursor_);
-        }
-        if (vertical_resize_cursor_ != nullptr) {
-            glfwDestroyCursor(vertical_resize_cursor_);
-        }
-        if (diagonal_resize_cursor_ != nullptr) {
-            glfwDestroyCursor(diagonal_resize_cursor_);
-        }
-        if (anti_diagonal_resize_cursor_ != nullptr) {
-            glfwDestroyCursor(anti_diagonal_resize_cursor_);
-        }
+        cursor_manager_.Shutdown();
         glfwTerminate();
         glfw_initialized_ = false;
     }

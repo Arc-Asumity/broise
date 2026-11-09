@@ -81,6 +81,8 @@ class WindowInteractionMode {
     Resizing
 }
 
+class CursorManager
+
 class Style
 
 class ModuleLoader {
@@ -124,6 +126,7 @@ Application *-- Renderer : owns
 
 WindowManager *-- Window : owns
 WindowManager ..> WindowConfig : uses
+WindowManager *-- CursorManager : owns
 
 Window *-- WindowStatus : owns
 Window *-- WindowMetrics : owns
