@@ -8,40 +8,17 @@
 
 #pragma once
 
-#include <expected>
-#include <filesystem>
-
-#include <self/core/ModuleLoader.hpp>
-#include <self/ui/render/Renderer.hpp>
-#include <self/core/WindowManager.hpp>
-#include <self/core/WidgetManager.hpp>
+#include <self/platform/WindowManager.hpp>
+#include <self/modules/ModuleManager.hpp>
 
 class Application
 {
 public:
-    static std::expected<Application, WindowError>
-    Create(const char* title, const std::filesystem::path& installed_directory);
-
-    ~Application() = default;
-
-    Application(const Application&) = delete;
-    Application& operator=(const Application&) = delete;
-    Application(Application&&) noexcept = default;
-    Application& operator=(Application&& other) noexcept;
-
-    [[nodiscard]] const ModuleLoader& GetModuleManager() const noexcept;
-    [[nodiscard]] ModuleLoader& GetModuleManager() noexcept;
-
-    void Run();
+    explicit Application(std::string_view title, const std::filesystem::path& installed_directory);
 
 private:
-    Application(WindowManager windows, Renderer renderer,
-                const std::filesystem::path& installed_directory);
-
-    ModuleLoader modules_;
-    WidgetManager widgets_;
     WindowManager windows_;
-    Renderer renderer_;
+    ModuleManager modules_;
 
+    static void HandleError(WindowManagerError error);
 };
-

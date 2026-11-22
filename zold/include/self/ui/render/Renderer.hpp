@@ -16,7 +16,6 @@
 #include <self/ui/Base.hpp>
 #include <self/ui/Style.hpp>
 #include <self/core/IconManager.hpp>
-#include <self/core/WindowManager.hpp>
 #include <self/ui/render/IconRenderer.hpp>
 
 
