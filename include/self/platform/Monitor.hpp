@@ -11,7 +11,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include <self/platform/WindowManager.hpp>
+#include <self/platform/WindowManagerError.hpp>
 
 struct Monitor
 {

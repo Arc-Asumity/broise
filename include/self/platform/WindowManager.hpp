@@ -15,20 +15,12 @@
 
 #include <self/platform/Window.hpp>
 #include <self/platform/Monitor.hpp>
+#include <self/platform/WindowManagerError.hpp>
 
 namespace WindowCreateParams
 {
     constexpr float kScreenSizeRatio = 2.0f / 3.0f;
 }
-
-enum class WindowManagerError
-{
-    GlfwInitializationFailed = 1,
-    PrimaryMonitorUnavailable = 2,
-    VideoModeUnavailable = 3,
-    GladInitializationFailed = 4,
-    WindowCreationFailed = 5,
-};
 
 class WindowManager
 {
@@ -44,12 +36,13 @@ public:
 
 private:
     bool glfw_initialized_ = false;
+    bool glad_initialized_ = false;
 
-    Monitor primary_monitor_ = Monitor();
+    Monitor primary_monitor_{};
     const GLFWvidmode* mode_ = nullptr;
 
     std::vector<Window> windows_;
 
     std::expected<void, WindowManagerError> InitializeGlfw();
-    static std::expected<void, WindowManagerError> InitializeGlad();
+    std::expected<void, WindowManagerError> InitializeGlad();
 };

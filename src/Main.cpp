@@ -17,5 +17,7 @@ int main(const int argc, char* argv[])
         : std::filesystem::current_path();
     auto application = Application("Broise", installed_directory);
 
+    application.Run();
+
     return 0;
 }

@@ -19,12 +19,10 @@ std::expected<void, WindowManagerError> WindowManager::Initialize(const std::str
         return result;
     if (auto result = CreateWindow(title); !result)
         return result;
-    if (auto result = InitializeGlad(); !result)
-        return result;
     return {};
 }
 
-std::expected<void, WindowManagerError> WindowManager::CreateWindow(std::string_view title)
+std::expected<void, WindowManagerError> WindowManager::CreateWindow(const std::string_view title)
 {
     auto* native_window = glfwCreateWindow(
         static_cast<int>(static_cast<float>(primary_monitor_.width) * WindowCreateParams::kScreenSizeRatio),
@@ -39,6 +37,10 @@ std::expected<void, WindowManagerError> WindowManager::CreateWindow(std::string_
         primary_monitor_.position_x + static_cast<int>(static_cast<float>(primary_monitor_.height) * (1 - WindowCreateParams::kScreenSizeRatio) / 2));
 
     glfwMakeContextCurrent(native_window);
+
+    if (auto result = InitializeGlad(); !result)
+        return result;
+
     glfwSwapInterval(1);
 
     int framebuffer_width = 0;
@@ -62,6 +64,7 @@ std::expected<void, WindowManagerError> WindowManager::Frame()
     glfwPollEvents();
     for (Window window : windows_)
         window.Frame();
+    return {};
 }
 
 void WindowManager::RemoveClosed()
@@ -100,15 +103,18 @@ std::expected<void, WindowManagerError> WindowManager::InitializeGlfw()
         return std::unexpected(WindowManagerError::PrimaryMonitorUnavailable);
 
     if (auto result = QueryMonitor(monitor_ptr); result)
-        primary_monitor_ = result;
+        primary_monitor_ = result.value();
     else
-        return std::unexpected(result);
+        return std::unexpected(result.error());
 
     return {};
 }
 
 std::expected<void, WindowManagerError> WindowManager::InitializeGlad()
 {
+    if (glad_initialized_) return {};
+    glad_initialized_ = true;
+
     if (gladLoadGL(glfwGetProcAddress) == 0) {
         glfwDestroyWindow(glfwGetCurrentContext());
         return std::unexpected(WindowManagerError::GladInitializationFailed);

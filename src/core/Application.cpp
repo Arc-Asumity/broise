@@ -15,7 +15,7 @@ Application::Application(const std::string_view title, const std::filesystem::pa
     : modules_(installed_directory / "mods")
 {
     windows_ = WindowManager();
-    if (auto result = windows_.Initialize(title); result)
+    if (auto result = windows_.Initialize(title); !result)
         HandleError(result.error());
 }
 
@@ -23,7 +23,7 @@ void Application::Run()
 {
     while (!windows_.ShouldClose())
     {
-        if (auto result = windows_.Frame())
+        if (auto result = windows_.Frame(); !result)
             HandleError(result.error());
         windows_.RemoveClosed();
     }

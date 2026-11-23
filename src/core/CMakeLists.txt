@@ -9,4 +9,5 @@ target_include_directories(Broise_Runtime
 target_link_libraries(Broise_Runtime
     PRIVATE
         Broise::Module
+        Broise::Platform
 )
