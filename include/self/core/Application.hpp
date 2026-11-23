@@ -6,6 +6,7 @@
 // Path /include/self/core/Application.hpp
 // Header for application.
 
+
 #pragma once
 
 #include <self/platform/WindowManager.hpp>
@@ -15,6 +16,8 @@ class Application
 {
 public:
     explicit Application(std::string_view title, const std::filesystem::path& installed_directory);
+
+    void Run();
 
 private:
     WindowManager windows_;

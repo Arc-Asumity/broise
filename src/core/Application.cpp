@@ -19,6 +19,16 @@ Application::Application(const std::string_view title, const std::filesystem::pa
         HandleError(result.error());
 }
 
+void Application::Run()
+{
+    while (!windows_.ShouldClose())
+    {
+        if (auto result = windows_.Frame())
+            HandleError(result.error());
+        windows_.RemoveClosed();
+    }
+}
+
 void Application::HandleError(WindowManagerError error)
 {
     std::cout << "Error code: " << static_cast<int>(error);

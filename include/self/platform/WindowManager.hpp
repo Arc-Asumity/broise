@@ -36,8 +36,11 @@ public:
     WindowManager() = default;
 
     std::expected<void, WindowManagerError> Initialize(std::string_view title);
-
     std::expected<void, WindowManagerError> CreateWindow(std::string_view title);
+
+    std::expected<void, WindowManagerError> Frame();
+    void RemoveClosed();
+    [[nodiscard]] bool ShouldClose() const;
 
 private:
     bool glfw_initialized_ = false;

@@ -17,7 +17,14 @@ class Window {
 public:
     explicit Window(GLFWwindow* handle);
 
+    [[nodiscard]] bool ShouldClose() const;
+
+    void Frame();
+
 private:
     GLFWwindow* handle_{};
 
+    void MakeCurrent() const;
+    void Update();
+    void Render();
 };

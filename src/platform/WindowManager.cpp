@@ -57,6 +57,30 @@ std::expected<void, WindowManagerError> WindowManager::CreateWindow(std::string_
     return {};
 }
 
+std::expected<void, WindowManagerError> WindowManager::Frame()
+{
+    glfwPollEvents();
+    for (Window window : windows_)
+        window.Frame();
+}
+
+void WindowManager::RemoveClosed()
+{
+    auto it = windows_.begin();
+    while (it != windows_.end())
+    {
+        if (it->ShouldClose())
+            it = windows_.erase(it);
+        else
+            ++it;
+    }
+}
+
+bool WindowManager::ShouldClose() const
+{
+    return windows_.empty();
+}
+
 std::expected<void, WindowManagerError> WindowManager::InitializeGlfw()
 {
     if (glfw_initialized_) return {};
