@@ -13,16 +13,18 @@
 
 #include <self/platform/WindowManager.hpp>
 
-std::expected<void, WindowManagerError> WindowManager::Initialize(const std::string_view title)
+#include "self/platform/Translator.hpp"
+
+std::expected<void, WindowManagerError> WindowManager::Initialize(const std::string_view title, const std::vector<IconImage>& icons)
 {
     if (auto result = InitializeGlfw(); !result)
         return result;
-    if (auto result = CreateWindow(title); !result)
+    if (auto result = CreateWindow(title, icons); !result)
         return result;
     return {};
 }
 
-std::expected<void, WindowManagerError> WindowManager::CreateWindow(const std::string_view title)
+std::expected<void, WindowManagerError> WindowManager::CreateWindow(const std::string_view title, const std::vector<IconImage>& icons)
 {
     auto* native_window = glfwCreateWindow(
         static_cast<int>(static_cast<float>(primary_monitor_.width) * WindowCreateParams::kScreenSizeRatio),
@@ -54,6 +56,12 @@ std::expected<void, WindowManagerError> WindowManager::CreateWindow(const std::s
     //glfwSetWindowUserPointer(native_window, &window);
     //glfwSetFramebufferSizeCallback(
     //    native_window, Window::FramebufferSizeCallback);
+
+    glfwSetWindowIcon(
+        native_window,
+        static_cast<int>(icons.size()),
+        IconTranslator::ToGlfwImages(icons).data()
+    );
 
     windows_.emplace_back(native_window);
     return {};

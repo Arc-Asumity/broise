@@ -16,6 +16,7 @@
 #include <self/platform/Window.hpp>
 #include <self/platform/Monitor.hpp>
 #include <self/platform/WindowManagerError.hpp>
+#include <self/assets/Icon.hpp>
 
 namespace WindowCreateParams
 {
@@ -27,8 +28,8 @@ class WindowManager
 public:
     WindowManager() = default;
 
-    std::expected<void, WindowManagerError> Initialize(std::string_view title);
-    std::expected<void, WindowManagerError> CreateWindow(std::string_view title);
+    std::expected<void, WindowManagerError> Initialize(std::string_view title, const std::vector<IconImage>& icons);
+    std::expected<void, WindowManagerError> CreateWindow(std::string_view title, const std::vector<IconImage>& icons);
 
     [[nodiscard]] std::expected<void, WindowManagerError> Frame() const;
     std::expected<void, WindowManagerError> Update();

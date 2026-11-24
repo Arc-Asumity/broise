@@ -1,4 +1,4 @@
-add_library(Broise_Platform WindowManager.cpp Window.cpp Monitor.cpp)
+add_library(Broise_Platform WindowManager.cpp Window.cpp Monitor.cpp Translator.cpp)
 add_library(Broise::Platform ALIAS Broise_Platform)
 
 target_include_directories(Broise_Platform
@@ -10,4 +10,5 @@ target_link_libraries(Broise_Platform
     PUBLIC
         Broise::OpenGL
         Broise::GLAD
+        Broise::Assets
 )

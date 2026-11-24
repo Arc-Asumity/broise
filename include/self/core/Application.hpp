@@ -11,6 +11,7 @@
 
 #include <self/platform/WindowManager.hpp>
 #include <self/modules/ModuleManager.hpp>
+#include <self/assets/Icon.hpp>
 
 class Application
 {
@@ -22,6 +23,9 @@ public:
 private:
     WindowManager windows_;
     ModuleManager modules_;
+    IconManager icons_;
+
+    std::vector<IconImage> window_icon_;
 
     static void HandleError(WindowManagerError error);
 };

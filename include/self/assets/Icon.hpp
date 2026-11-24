@@ -9,9 +9,50 @@
 
 #pragma once
 
-#include <vector>
 #include <expected>
 #include <filesystem>
-#include <unordered_map>
+#include <vector>
 
+constexpr std::array kWindowIconSize = {
+    16,
+    24,
+    32,
+    48,
+    64,
+    128,
+    256
+};
 
+enum class IconManagerError
+{
+    NotFound = 0,
+    ReadFailed = 1,
+    LoadDocumentFailed = 2,
+    RasterizeFailed = 3,
+};
+
+constexpr std::array<std::string_view, 4> kIconManagerErrorName = {
+    "Icon Not Found",
+    "Read Failed",
+    "Load Document Failed",
+    "Rasterize Failed"
+};
+
+struct IconImage {
+    int width;
+    int height;
+    std::vector<unsigned char> pixels;
+};
+
+class IconManager
+{
+public:
+    explicit IconManager(const std::filesystem::path& icons_path);
+
+    std::expected<std::vector<IconImage>, IconManagerError> GetWindowImage(std::string_view path) const;
+    std::expected<IconImage, IconManagerError> GetImage(std::string_view path, unsigned char& color);
+    std::expected<std::string, IconManagerError> GetSvg(std::string_view path) const;
+
+private:
+    std::filesystem::path icon_directory_;
+};
