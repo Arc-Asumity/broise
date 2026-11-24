@@ -30,7 +30,9 @@ public:
     std::expected<void, WindowManagerError> Initialize(std::string_view title);
     std::expected<void, WindowManagerError> CreateWindow(std::string_view title);
 
-    std::expected<void, WindowManagerError> Frame();
+    [[nodiscard]] std::expected<void, WindowManagerError> Frame() const;
+    std::expected<void, WindowManagerError> Update();
+
     void RemoveClosed();
     [[nodiscard]] bool ShouldClose() const;
 

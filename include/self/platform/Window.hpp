@@ -16,15 +16,23 @@
 class Window {
 public:
     explicit Window(GLFWwindow* handle);
+    ~Window();
+
+    Window(const Window&) = delete;
+    Window& operator=(const Window&) = delete;
+
+    Window(Window&& other) noexcept;
+    Window& operator=(Window&& other) noexcept;
 
     [[nodiscard]] bool ShouldClose() const;
 
-    void Frame();
+    void Frame() const;
+    void Update();
 
 private:
     GLFWwindow* handle_{};
 
     void MakeCurrent() const;
-    void Update();
-    void Render();
+    void Render() const;
+    void SetIcon(const GLFWimage& icon);
 };

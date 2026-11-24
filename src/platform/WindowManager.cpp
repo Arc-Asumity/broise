@@ -59,11 +59,18 @@ std::expected<void, WindowManagerError> WindowManager::CreateWindow(const std::s
     return {};
 }
 
-std::expected<void, WindowManagerError> WindowManager::Frame()
+std::expected<void, WindowManagerError> WindowManager::Frame() const
+{
+    for (const Window& window : windows_)
+        window.Frame();
+    return {};
+}
+
+std::expected<void, WindowManagerError> WindowManager::Update()
 {
     glfwPollEvents();
-    for (Window window : windows_)
-        window.Frame();
+    for (Window& window : windows_)
+        window.Update();
     return {};
 }
 
