@@ -9,6 +9,8 @@
 
 #include <self/platform/Translator.hpp>
 
+using WindowGlfwImages = std::array<GLFWimage, kWindowIconSize.size()>;
+
 GLFWimage IconTranslator::ToGlfwImage(const IconImage& image)
 {
     return GLFWimage{
@@ -18,13 +20,12 @@ GLFWimage IconTranslator::ToGlfwImage(const IconImage& image)
     };
 }
 
-std::vector<GLFWimage> IconTranslator::ToGlfwImages(const std::vector<IconImage>& images)
+WindowGlfwImages IconTranslator::ToGlfwImages(const WindowIconImages& images)
 {
-    std::vector<GLFWimage> result;
-    result.reserve(images.size());
+    WindowGlfwImages result;
 
-    for (const IconImage& image : images)
-        result.push_back(ToGlfwImage(image));
+    for (size_t i = 0; i < kWindowIconSize.size(); i++)
+        result[i] = ToGlfwImage(images[i]);
 
     return result;
 }

@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <array>
+
 #include <self/platform/WindowManager.hpp>
 #include <self/modules/ModuleManager.hpp>
 #include <self/assets/Icon.hpp>
@@ -25,7 +27,7 @@ private:
     ModuleManager modules_;
     IconManager icons_;
 
-    std::vector<IconImage> window_icon_;
+    WindowIconImages window_icon_;
 
     static void HandleError(WindowManagerError error);
 };

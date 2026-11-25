@@ -17,7 +17,7 @@ IconManager::IconManager(const std::filesystem::path& icons_path)
     icon_directory_ = icons_path;
 }
 
-std::expected<std::vector<IconImage>, IconManagerError> IconManager::GetWindowImage(const std::string_view path) const
+std::expected<WindowIconImages, IconManagerError> IconManager::GetWindowImage(const std::string_view path) const
 {
     std::string data;
 
@@ -30,11 +30,11 @@ std::expected<std::vector<IconImage>, IconManagerError> IconManager::GetWindowIm
     if (document == nullptr)
         return std::unexpected(IconManagerError::LoadDocumentFailed);
 
-    std::vector<IconImage> images;
-    images.reserve(kWindowIconSize.size());
+    WindowIconImages images;
 
-    for (const int& size : kWindowIconSize)
+    for (size_t i = 0; i < kWindowIconSize.size(); i++)
     {
+        const int size = kWindowIconSize[i];
         auto bitmap = document->renderToBitmap(size, size);
         if (bitmap.isNull())
             return std::unexpected(IconManagerError::LoadDocumentFailed);
@@ -44,7 +44,7 @@ std::expected<std::vector<IconImage>, IconManagerError> IconManager::GetWindowIm
         const auto* pixels = bitmap.data();
         const auto pixels_size = bitmap.width() * bitmap.height() * 4;
 
-        images.emplace_back(
+        images[i] = IconImage(
             bitmap.width(), bitmap.height(),
             std::vector(pixels, pixels + pixels_size)
         );

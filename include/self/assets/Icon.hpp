@@ -44,14 +44,20 @@ struct IconImage {
     std::vector<unsigned char> pixels;
 };
 
+using WindowIconImages = std::array<IconImage, kWindowIconSize.size()>;
+
 class IconManager
 {
 public:
     explicit IconManager(const std::filesystem::path& icons_path);
 
-    std::expected<std::vector<IconImage>, IconManagerError> GetWindowImage(std::string_view path) const;
+    [[nodiscard]] std::expected<WindowIconImages, IconManagerError>
+    GetWindowImage(std::string_view path) const;
+
     std::expected<IconImage, IconManagerError> GetImage(std::string_view path, unsigned char& color);
-    std::expected<std::string, IconManagerError> GetSvg(std::string_view path) const;
+
+    [[nodiscard]] std::expected<std::string, IconManagerError>
+    GetSvg(std::string_view path) const;
 
 private:
     std::filesystem::path icon_directory_;

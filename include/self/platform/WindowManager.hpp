@@ -28,8 +28,8 @@ class WindowManager
 public:
     WindowManager() = default;
 
-    std::expected<void, WindowManagerError> Initialize(std::string_view title, const std::vector<IconImage>& icons);
-    std::expected<void, WindowManagerError> CreateWindow(std::string_view title, const std::vector<IconImage>& icons);
+    std::expected<void, WindowManagerError> Initialize(std::string_view title, const WindowIconImages& icons);
+    std::expected<void, WindowManagerError> CreateWindow(std::string_view title, const WindowIconImages& icons);
 
     [[nodiscard]] std::expected<void, WindowManagerError> Frame() const;
     std::expected<void, WindowManagerError> Update();

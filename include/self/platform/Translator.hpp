@@ -10,12 +10,14 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
-#include <vector>
+#include <array>
 
 #include <self/assets/Icon.hpp>
 
 namespace IconTranslator
 {
     GLFWimage ToGlfwImage(const IconImage& image);
-    std::vector<GLFWimage> ToGlfwImages(const std::vector<IconImage>& images);
+
+    std::array<GLFWimage, kWindowIconSize.size()>
+    ToGlfwImages(const std::array<IconImage, kWindowIconSize.size()>& images);
 }

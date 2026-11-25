@@ -15,7 +15,7 @@
 
 #include "self/platform/Translator.hpp"
 
-std::expected<void, WindowManagerError> WindowManager::Initialize(const std::string_view title, const std::vector<IconImage>& icons)
+std::expected<void, WindowManagerError> WindowManager::Initialize(const std::string_view title, const WindowIconImages& icons)
 {
     if (auto result = InitializeGlfw(); !result)
         return result;
@@ -24,7 +24,7 @@ std::expected<void, WindowManagerError> WindowManager::Initialize(const std::str
     return {};
 }
 
-std::expected<void, WindowManagerError> WindowManager::CreateWindow(const std::string_view title, const std::vector<IconImage>& icons)
+std::expected<void, WindowManagerError> WindowManager::CreateWindow(const std::string_view title, const WindowIconImages& icons)
 {
     auto* native_window = glfwCreateWindow(
         static_cast<int>(static_cast<float>(primary_monitor_.width) * WindowCreateParams::kScreenSizeRatio),
@@ -59,7 +59,7 @@ std::expected<void, WindowManagerError> WindowManager::CreateWindow(const std::s
 
     glfwSetWindowIcon(
         native_window,
-        static_cast<int>(icons.size()),
+        icons.size(),
         IconTranslator::ToGlfwImages(icons).data()
     );
 
